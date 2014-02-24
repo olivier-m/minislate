@@ -24,7 +24,7 @@ rangy.config = {
 // RANGY -->>
 
 //<<-- EDITOR
-editor = {% include "src/main.js" %}
+var editor = {% include "src/main.js" %}
 // EDITOR -->>
 
 //<<-- BUTTONS
