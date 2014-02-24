@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Editor demo</title>
+  <link rel="stylesheet" href="css/foxypen.css" />
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" />
+</head>
+<body>
+
+<div class="editable" style="width:80%">
+<h1>Test</h1>
+
+
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vel sodales nunc. Phasellus elit
+augue, interdum <a href="http://google.com/">tristique nisl</a> ut, ultricies mattis elit. Mauris eu fringilla lacus. Vestibulum ac
+erat vel mi <strong>accumsan</strong> cursus sit amet dapibus mi. Praesent iaculis tempor dictum. Donec eu lorem et
+turpis tincidunt congue. Sed <em><strong>sagittis</strong></em> diam ut felis iaculis euismod.</p>
+
+<p>Ut non est in dolor <em>ornare <strong>auctor</strong></em>. Cras sit amet neque a lorem sagittis accumsan. Fusce quis arcu
+id nibh consectetur auctor sed sit amet lectus. Duis ultricies et orci vel accumsan. Praesent
+ultrices dui ligula, sit amet semper diam aliquam eget.</p>
+
+<p>Mauris <em>hendrerit <u><span><strong>velit</strong></span></u> nec</em> arcu fermentum, sit amet congue tellus gravida. In leo erat, egestas
+id tortor et, facilisis malesuada eros. Nam vitae eleifend augue. Pellentesque eu massa a turpis
+feugiat vehicula vel sit amet enim.</p>
+</div>
+
+<h2>Non editable</h2>
+
+<p>Quisque id tortor lectus. Cras non leo non metus luctus faucibus. Sed in nisl ultricies,
+venenatis turpis id, dignissim eros. Donec pharetra gravida ligula at consequat.</p>
+
+<script src="js/foxypen.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  var editor = new Foxypen('.editable', {
+  });
+});
+
+</script>
+</body>
+</html>
