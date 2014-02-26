@@ -214,8 +214,8 @@ Editor.addDefaultButton('link', {
             editor = this.toolbar.editor;
 
         editor.on('keydown', function(evt) {
-            // Allow bold with Cmd+Shift+l or Ctrl+Shift+l
-            if (evt.which === 76 && evt.shiftKey && (evt.ctrlKey || evt.metaKey)) {
+            // Allow bold with Cmd+Shift+k or Ctrl+Shift+k
+            if (evt.which === 75 && evt.shiftKey && (evt.ctrlKey || evt.metaKey)) {
                 evt.preventDefault();
                 self.options.click.call(self);
             }
