@@ -22,10 +22,27 @@ module.exports = function(grunt) {
             }
         },
 
+        concat: {
+            css: {
+                src: ['src/css/font-awesome.css', 'src/css/editor.css'],
+                dest: 'dist/css/<%= pkg.name.toLowerCase() %>-full.css'
+            }
+        },
+
         copy: {
             css: {
-                src: 'src/css/editor.css',
-                dest: 'dist/css/<%= pkg.name.toLowerCase() %>.css'
+                files: [
+                    {
+                        src: 'src/css/editor.css',
+                        dest: 'dist/css/<%= pkg.name.toLowerCase() %>.css'
+                    },
+                    {
+                        expand: true,
+                        cwd: 'src/css/fonts',
+                        src: '**',
+                        dest: 'dist/css/fonts'
+                    }
+                ]
             },
             rangy: {
                 src: 'src/vendor/rangy/core/*.js',
@@ -79,13 +96,14 @@ module.exports = function(grunt) {
 
     grunt.loadTasks('build/tasks');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('build', ['rangy', 'bundle:editor']);
-    grunt.registerTask('dist', ['build', 'uglify', 'copy:css', 'clean:tmp']);
+    grunt.registerTask('dist', ['build', 'uglify', 'concat:css', 'copy:css', 'clean:tmp']);
     grunt.registerTask('rangy', ['copy:rangy', 'bundle:rangy']);
     grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch:dev']);
 };
