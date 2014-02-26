@@ -137,7 +137,19 @@ Editor.addDefaultButton('ol', Editor.getBlockButtonSpec('ol', ['ol'], {
 Editor.addDefaultButton('bold', Editor.getInlineButtonSpec('bold', ['b', 'strong'], {
     label: 'B',
     title: 'Bold',
-    fontAwesomeID: 'bold'
+    fontAwesomeID: 'bold',
+    init: function() {
+        var self = this,
+            editor = this.toolbar.editor;
+
+        editor.on('keydown', function(evt) {
+            // Allow bold with Cmd+b or Ctrl+b
+            if (evt.which === 66 && (evt.ctrlKey || evt.metaKey)) {
+                evt.preventDefault();
+                self.options.click.call(self);
+            }
+        });
+    }
 }));
 
 
@@ -145,7 +157,19 @@ Editor.addDefaultButton('bold', Editor.getInlineButtonSpec('bold', ['b', 'strong
 Editor.addDefaultButton('italic', Editor.getInlineButtonSpec('italic', ['i', 'em'], {
     label: 'I',
     title: 'Italic',
-    fontAwesomeID: 'italic'
+    fontAwesomeID: 'italic',
+    init: function() {
+        var self = this,
+            editor = this.toolbar.editor;
+
+        editor.on('keydown', function(evt) {
+            // Allow bold with Cmd+i or Ctrl+i
+            if (evt.which === 73 && (evt.ctrlKey || evt.metaKey)) {
+                evt.preventDefault();
+                self.options.click.call(self);
+            }
+        });
+    }
 }));
 
 
@@ -183,6 +207,19 @@ Editor.addDefaultButton('link', {
 
     isVisible: function() {
         return !this.toolbar.editor.getRange().collapsed || this.options.isHighlighted.call(this);
+    },
+
+    init: function() {
+        var self = this,
+            editor = this.toolbar.editor;
+
+        editor.on('keydown', function(evt) {
+            // Allow bold with Cmd+Shift+l or Ctrl+Shift+l
+            if (evt.which === 76 && evt.shiftKey && (evt.ctrlKey || evt.metaKey)) {
+                evt.preventDefault();
+                self.options.click.call(self);
+            }
+        });
     },
 
     click: function() {
@@ -245,6 +282,7 @@ Editor.addDefaultButton('link', {
         r.restoreSelection(selection);
         r.removeMarkers(selection);
         this.toolbar.editor.showToolbar();
+        this.toolbar.editor._getSelectionElement().focus();
     },
 
     saveLink: function(node, url) {
