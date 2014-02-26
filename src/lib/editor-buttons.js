@@ -89,7 +89,21 @@ Editor.addDefaultButton('pre', Editor.getBlockButtonSpec('pre', ['pre'], {
     label: '<>',
     title: 'Preformated',
     className: 'pre',
-    menu: 'blocks'
+    menu: 'blocks',
+    init: function() {
+        var editor = this.toolbar.editor;
+
+        editor.on('keydown', function(evt) {
+            // Activate tab in preformated, lists and blockquotes
+            if (evt.which === 9 && !evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
+                var filter = editor.filterSelectionNodeName('pre');
+                if (filter.length > 0) {
+                    evt.preventDefault();
+                    editor.exec('insertHtml', '    ');
+                }
+            }
+        });
+    }
 }));
 
 Editor.addDefaultMenu('lists', {
