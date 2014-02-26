@@ -80,7 +80,8 @@
             // Init editor
             this.initElements()
                 .initToolbar()
-                .bindSelect();
+                .bindSelect()
+                .bindTyping();
         },
 
         iter: function(callback) {
@@ -88,15 +89,22 @@
             for (i=0; i<this.elements.length; i++) {
                 callback.call(this, this.elements[i]);
             }
+            return this;
+        },
+
+        on: function(name, handler) {
+            return this.iter(function(node) {
+                node.addEventListener(name, handler);
+            });
+        },
+
+        off: function(name, handler) {
+            return this.iter(function(node) {
+                node.removeEventListener(name, handler);
+            });
         },
 
         initElements: function() {
-            this._showEvt = document.createEvent('Event');
-            this._showEvt.initEvent('toolbar.show', false, true);
-
-            this._hideEvt = document.createEvent('Event');
-            this._hideEvt.initEvent('toolbar.hide', false, true);
-
             this.iter(function(node) {
                 node.setAttribute('contentEditable', true);
                 node.setAttribute('data-editor-element', true);
@@ -119,6 +127,17 @@
             document.addEventListener('mouseup', wrapper);
             document.addEventListener('keyup', wrapper);
             return this;
+        },
+
+        bindTyping: function() {
+            var self = this;
+
+            this.on('keyup', function() {
+                // Force paragraph on empty block
+                if (self.getSelection().getStart() === self._currentEditor) {
+                    self.exec('formatBlock', 'p');
+                }
+            });
         },
 
         initToolbar: function() {

@@ -83,6 +83,11 @@ rangy.createCoreModule('RangyExtensions', [], function(api) {
         node.parentNode.replaceChild(content, node);
     };
 
+    api.selectionPrototype.getStart = function() {
+        var node = this.anchorNode;
+        return node && node.nodeType === 3 ? node.parentNode : node;
+    };
+
     api.dom.getTopContainer = function(node) {
         // Returns top fully enclosing container for a node
         while (node.parentNode.childNodes.length === 1) {
