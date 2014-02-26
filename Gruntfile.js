@@ -89,7 +89,7 @@ module.exports = function(grunt) {
         watch: {
             dev: {
                 files: ['src/**', 'build/templates/*'],
-                tasks: ['build', 'uglify:dist', 'copy:css']
+                tasks: ['build', 'uglify:dist', 'concat:css', 'copy:css']
             }
         }
     });
