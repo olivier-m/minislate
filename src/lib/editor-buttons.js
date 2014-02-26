@@ -2,16 +2,16 @@
 
 Editor.getInlineButtonSpec = function(command, tagList, options) {
     options.isHighlighted = function() {
-        return this.editor.filterSelectionNodeName.apply(this.editor, tagList).length > 0;
+        return this.toolbar.editor.filterSelectionNodeName.apply(this.toolbar.editor, tagList).length > 0;
     };
 
     options.isVisible = function() {
-        return !this.editor.getRange().collapsed || this.options.isHighlighted.call(this);
+        return !this.toolbar.editor.getRange().collapsed || this.options.isHighlighted.call(this);
     };
 
     options.click = function() {
-        var editor = this.editor,
-            info = this.editor.getRangeInfo();
+        var editor = this.toolbar.editor,
+            info = editor.getRangeInfo();
 
         if (info.range.collapsed) {
             var node = editor.filterSelectionNodeName.apply(editor, tagList);
@@ -32,7 +32,12 @@ Editor.getInlineButtonSpec = function(command, tagList, options) {
 
 Editor.getBlockButtonSpec = function(tag, tagList, options) {
     options.isHighlighted = function() {
-        return this.editor.filterSelectionNodeName.apply(this.editor, tagList).length > 0;
+        var res = this.toolbar.editor.filterSelectionNodeName.apply(this.toolbar.editor, tagList).length > 0;
+        if (res && this.menu) {
+            this.menu.setHighlight(true);
+            this.menu.setLabel(this.label, this.options.fontAwesomeID);
+        }
+        return res;
     };
 
     options.isVisible = function() {
@@ -46,46 +51,61 @@ Editor.getBlockButtonSpec = function(tag, tagList, options) {
     }
 
     options.click = function() {
-        this.editor.exec(command, '<' + tag + '>');
-        this.editor.showToolbar();
+        this.toolbar.editor.exec(command, '<' + tag + '>');
+        this.toolbar.editor.showToolbar();
     };
     return options;
 };
 
 
+Editor.addDefaultMenu('blocks', {
+    label: '¶',
+    title: 'Blocks',
+    isHighlighted: function() { return false; }
+});
+
 // Paragraph
-Editor.addDefaultButton('P', Editor.getBlockButtonSpec('p', ['p'], {
+Editor.addDefaultButton('p', Editor.getBlockButtonSpec('p', ['p'], {
     label: '¶',
     title: 'Paragraph',
-    className: 'p'
+    className: 'p',
+    menu: 'blocks'
 }));
 
 
 // Titles
 var levels = [1,2,3,4];
 for (var i=0; i<levels.length; i++) {
-    Editor.addDefaultButton('H' + levels[i], Editor.getBlockButtonSpec('h' + levels[i], ['h' + levels[i]], {
+    Editor.addDefaultButton('h' + levels[i], Editor.getBlockButtonSpec('h' + levels[i], ['h' + levels[i]], {
+        label: 'H' + levels[i],
         title: 'Title level ' + levels[i],
-        className: 'h' + levels[i]
+        className: 'h' + levels[i],
+        menu: 'blocks'
     }));
 }
-
 
 // Preformated text
 Editor.addDefaultButton('pre', Editor.getBlockButtonSpec('pre', ['pre'], {
     label: '<>',
-    title: 'Preformated text',
-    className: 'pre'
+    title: 'Preformated',
+    className: 'pre',
+    menu: 'blocks'
 }));
 
+Editor.addDefaultMenu('lists', {
+    label: 'Lists',
+    title: 'Lists',
+    fontAwesomeID: 'list-ul',
+    isHighlighted: function() { return false; }
+});
 
 // Unordered list
 Editor.addDefaultButton('ul', Editor.getBlockButtonSpec('ul', ['ul'], {
     label: 'UL',
     title: 'Unordered list',
-    className: 'ul',
-    faId: 'list-ul',
-    command: 'insertunorderedlist'
+    fontAwesomeID: 'list-ul',
+    command: 'insertunorderedlist',
+    menu: 'lists'
 }));
 
 
@@ -93,65 +113,67 @@ Editor.addDefaultButton('ul', Editor.getBlockButtonSpec('ul', ['ul'], {
 Editor.addDefaultButton('ol', Editor.getBlockButtonSpec('ol', ['ol'], {
     label: 'OL',
     title: 'Ordered list',
-    className: 'ol',
-    faId: 'list-ol',
-    command: 'insertorderedlist'
+    fontAwesomeID: 'list-ol',
+    command: 'insertorderedlist',
+    menu: 'lists'
 }));
 
 
 // Bold
-Editor.addDefaultButton('B', Editor.getInlineButtonSpec('bold', ['b', 'strong'], {
+Editor.addDefaultButton('bold', Editor.getInlineButtonSpec('bold', ['b', 'strong'], {
+    label: 'B',
     title: 'Bold',
-    className: 'bold',
-    faId: 'bold'
+    fontAwesomeID: 'bold'
 }));
 
 
 // Italic
-Editor.addDefaultButton('I', Editor.getInlineButtonSpec('italic', ['i', 'em'], {
+Editor.addDefaultButton('italic', Editor.getInlineButtonSpec('italic', ['i', 'em'], {
+    label: 'I',
     title: 'Italic',
-    className: 'italic',
-    faId: 'italic'
+    fontAwesomeID: 'italic'
 }));
 
 
 // Underline
-Editor.addDefaultButton('U', Editor.getInlineButtonSpec('underline', ['u', 'ins'], {
+Editor.addDefaultButton('underline', Editor.getInlineButtonSpec('underline', ['u', 'ins'], {
+    label: 'U',
     title: 'Underline',
-    className: 'underline',
-    faId: 'underline'
+    fontAwesomeID: 'underline'
 }));
 
 
 // Strike
-Editor.addDefaultButton('S', Editor.getInlineButtonSpec('strikeThrough', ['strike', 'del'], {
+Editor.addDefaultButton('strike', Editor.getInlineButtonSpec('strikeThrough', ['strike', 'del'], {
+    label: 'S',
     title: 'Strike',
-    className: 'strike',
-    faId: 'strikethrough'
+    fontAwesomeID: 'strikethrough'
 }));
 
-
 // Link
-Editor.addDefaultButton('Link', {
+Editor.addDefaultButton('link', {
+    label: '#',
     base_title: 'Link',
     title: '',
-    className: 'link',
-    faId: 'link',
+    fontAwesomeID: 'link',
+
     isHighlighted: function() {
         var title = this.options.base_title;
-        var nodes = this.editor.filterSelectionNodeName('a');
+        var nodes = this.toolbar.editor.filterSelectionNodeName('a');
         if (nodes.length > 0) {
             title += ': ' + nodes[0].href;
         }
         this.element.setAttribute('title', title);
         return nodes.length > 0;
     },
+
     isVisible: function() {
-        return !this.editor.getRange().collapsed || this.options.isHighlighted.call(this);
+        return !this.toolbar.editor.getRange().collapsed || this.options.isHighlighted.call(this);
     },
+
     click: function() {
         var self = this,
-            editor = this.editor,
+            editor = this.toolbar.editor,
             info = editor.getRangeInfo();
 
         var node = editor.filterSelectionNodeName('a');
@@ -161,15 +183,15 @@ Editor.addDefaultButton('Link', {
 
         node = node.length === 0 ? null : node[0];
         if (info.range.collapsed) {
-            this.editor.setRange(node);
+            editor.setRange(node);
         }
 
         var selection = editor.rangy.saveSelection();
-        this.editor.showDialog(function() {
+        editor.showDialog(function() {
             input.focus();
         });
 
-        var dialog = this.editor.dialog;
+        var dialog = this.toolbar.dialog;
         var label = document.createElement('label');
         label.appendChild(document.createTextNode('URL: '));
         var input = document.createElement('input');
@@ -203,14 +225,16 @@ Editor.addDefaultButton('Link', {
             self.options.saveLink.call(self, node, evt.target.value);
         });
     },
+
     restoreSelection: function(selection) {
-        var r = this.editor.rangy;
+        var r = this.toolbar.editor.rangy;
         r.restoreSelection(selection);
         r.removeMarkers(selection);
-        this.editor.showToolbar();
+        this.toolbar.editor.showToolbar();
     },
+
     saveLink: function(node, url) {
-        var editor = this.editor,
+        var editor = this.toolbar.editor,
             info = editor.getRangeInfo();
 
         if (node) {
@@ -238,18 +262,19 @@ Editor.addDefaultButton('Link', {
     }
 });
 
-
 // Image
-Editor.addDefaultButton('Image', {
+Editor.addDefaultButton('image', {
+    label: 'IMG',
     title: 'Image',
     className: 'image',
-    faId: 'picture-o'
+    fontAwesomeID: 'picture-o'
 });
 
 
 // Oembed
-Editor.addDefaultButton('Embed', {
-    title: 'Embeded',
+Editor.addDefaultButton('embed', {
+    label: 'Embeded',
+    title: 'Embeded content',
     className: 'oembed',
-    faId: 'youtube-play'
+    fontAwesomeID: 'youtube-play'
 });

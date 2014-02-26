@@ -3,7 +3,6 @@ div.editor-toolbar {
     top: 0;
     left: 0;
     z-index: 2000;
-    visibility: hidden;
 
     background-color: #333;
     color: #fff;
@@ -14,9 +13,7 @@ div.editor-toolbar {
     font-size: 16px;
 
     box-shadow: 2px 5px 8px rgba(0,0,0, 0.6);
-}
-div.editor-toolbar-active {
-    visibility: visible;
+
     animation: pop-upwards 100ms forward linear;
     transition: top .1s ease-out, left .1s ease-out;
 }
@@ -48,6 +45,7 @@ div.editor-toolbar li button {
     border: 0;
     border-right: 1px solid #000;
     border-left: 1px solid #333;
+    outline: none;
 }
 div.editor-toolbar li button::-moz-focus-inner {
     border:0; padding:0
@@ -57,7 +55,7 @@ div.editor-toolbar li button:hover {
     background-color: #222;
     background-image: linear-gradient(#444, #222);
 }
-div.editor-toolbar li button.editor-highlight {
+div.editor-toolbar li button.editor-highlight, div.editor-toolbar li button:active {
     background-color: #444;
     background-image: linear-gradient(#333, #666);
 }
@@ -66,11 +64,38 @@ div.editor-toolbar li button.editor-highlight:hover {
     background-image: linear-gradient(#444, #777);
 }
 
+div.editor-toolbar li.editor-menu ul {
+    position: absolute;
+    border-radius: 3px;
+    box-shadow: 2px 5px 8px rgba(0,0,0, 0.6);
+    width: auto;
+}
+div.editor-toolbar li.editor-menu ul li {
+    float: none;
+    display: block;
+}
+div.editor-toolbar li.editor-menu ul li button em {
+    font-size: 0.8em;
+    font-style: normal;
+    color: #bbb;
+}
+div.editor-toolbar li.editor-menu ul li button {
+    width: 10em;
+    text-align: left;
+    border: 0;
+    border-bottom: 1px solid #000;
+    border-top: 1px solid #333;
+}
+
 div.editor-toolbar li button i.fa span {
     display: none;
 }
 div.editor-toolbar li button i.fa {
     font-weight: normal;
+}
+div.editor-toolbar li button.editor-menu i.fa-chevron-down {
+    font-size: 0.8em;
+    color: #888;
 }
 
 div.editor-dialog {

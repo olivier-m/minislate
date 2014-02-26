@@ -92,7 +92,7 @@ rangy.createCoreModule('RangyExtensions', [], function(api) {
     };
 
     api.dom.hasParents = function(node, parents) {
-        while (node !== document.body) {
+        while ([document, document.body].indexOf(node) === -1) {
             if (parents.indexOf(node) !== -1) {
                 return true;
             }

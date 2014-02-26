@@ -1,19 +1,43 @@
 (function() {
     'use strict';
 
-    function extend(b, a) {
-        var prop;
-        if (b === undefined) {
-            return a;
-        }
-        for (prop in a) {
-            if (a.hasOwnProperty(prop) && b.hasOwnProperty(prop) === false) {
-                b[prop] = a[prop];
+    /*
+     * Base object
+     */
+    var Base = Object.freeze(Object.create(Object.prototype, {
+        'new': {
+            value: function create() {
+                var object = Object.create(this);
+                object.initialize.apply(object, arguments);
+                return object;
+            }
+        },
+        initialize: {
+            value: function initialize() {}
+        },
+        merge: {
+            value: function merge() {
+                var descriptor = {};
+                Array.prototype.forEach.call(arguments, function (properties) {
+                    Object.getOwnPropertyNames(properties).forEach(function(name) {
+                        descriptor[name] = Object.getOwnPropertyDescriptor(properties, name);
+                    });
+                });
+                Object.defineProperties(this, descriptor);
+                return this;
+            }
+        },
+        extend: {
+            value: function extend() {
+                return Object.freeze(this.merge.apply(Object.create(this), arguments));
             }
         }
-        return b;
-    }
+    }));
 
+
+    /*
+     * Editor (main)
+     */
     var Editor = function(elements, options) {
         if (!window.getSelection) {
             throw new Error('Browser features missing.');
@@ -23,21 +47,10 @@
 
     Editor.prototype = {
         defaults: {
-            allowMultiParagraphSelection: true,
-            anchorInputPlaceholder: 'Paste or type a link',
-            buttons: ['bold', 'italic', 'underline', 'anchor', 'header1', 'header2', 'quote'],
-            buttonLabels: false,
             delay: 200,
             diffLeft: 2,
             diffTop: -10,
-            disableReturn: false,
-            disableToolbar: false,
-            firstHeader: 'h3',
-            forcePlainText: true,
-            placeholder: 'Type your text',
-            secondHeader: 'h4',
-            targetBlank: false,
-            faEnabled: true
+            fontAwesomeEnabled: true
         },
 
         init: function(elements, options) {
@@ -48,7 +61,7 @@
 
             this.isActive = true;
             this.id = this.elements.length + 1;
-            this.options = extend(options, this.defaults);
+            this.options = Base.extend(this.defaults, options);
 
             // Internal properties
             this._currentEditor = null;
@@ -105,60 +118,40 @@
 
             document.addEventListener('mouseup', wrapper);
             document.addEventListener('keyup', wrapper);
-
-            // this.iter(function(node) {
-            //    node.addEventListener('mouseup', wrapper);
-            //    node.addEventListener('keyup', wrapper);
-            //    node.addEventListener('blur', wrapper);
-            // });
-
             return this;
         },
 
         initToolbar: function() {
-            var self =this,
-                toolbar = document.createElement('div'),
-                controls = document.createElement('ul'),
-                dialog = document.createElement('div');
+            this.toolbar = Toolbar['new']({
+                fontAwesomeEnabled: this.options.fontAwesomeEnabled
+            });
+            this.toolbar.editor = this;
 
-            toolbar.id = 'editor-toolbar-' + this.id;
-            toolbar.classList.add('editor-toolbar');
-            toolbar.appendChild(controls);
+            this.addDefaultItems();
+            return this;
+        },
 
-            dialog.classList.add('editor-dialog');
-            dialog.style.display = 'none';
-            toolbar.appendChild(dialog);
-
-            document.body.appendChild(toolbar);
-
-            this.toolbar = toolbar;
-            this.controls = controls;
-            this.dialog = dialog;
-            this.addDefaultButtons();
-            this._toolbarClicked = false;
-
-            var focusEvent = function() {
-                self._toolbarClicked = true;
-            };
-            this.toolbar.addEventListener('click', focusEvent);
-            this.toolbar.addEventListener('focus', focusEvent);
+        addDefaultItems: function() {
+            var i, item;
+            for (i=0; i<Editor.defaultItems.length; i++) {
+                item = Editor.defaultItems[i];
+                if (item.type === 'menu') {
+                    this.addMenu(item.id, item.options, false);
+                } else {
+                    this.addButton(item.id, item.options, false);
+                }
+            }
+            this.toolbar.drawItems();
 
             return this;
         },
 
-        addDefaultButtons: function() {
-            var i, button;
-            for (i=0; i<Editor.defaultButtons.length; i++) {
-                button = Editor.defaultButtons[i];
-                this.addButton(button.id, button.options);
-            }
+        addButton: function(id, options, redraw) {
+            this.toolbar.addButton(id, options, redraw);
         },
 
-        addButton: function(label, options) {
-            var btn = new Button(this, label, options);
-            var li = document.createElement('li');
-            li.appendChild(btn.element);
-            this.controls.appendChild(li);
+        addMenu: function(id, options, redraw) {
+            this.toolbar.addMenu(id, options, redraw);
         },
 
         exec: function(cmd, arg) {
@@ -167,10 +160,7 @@
 
         showToolbar: function() {
             this.hideDialog();
-            if (!this.toolbar.classList.contains('editor-toolbar-active')) {
-                this.toolbar.classList.add('editor-toolbar-active');
-            }
-            this.toolbar.dispatchEvent(this._showEvt);
+            this.toolbar.show();
             this.setToolbarPosition();
             window.addEventListener('resize', this._resizeHandler);
             return this;
@@ -178,36 +168,28 @@
 
         hideToolbar: function() {
             window.removeEventListener('resize', this._resizeHandler);
-            this.toolbar.classList.remove('editor-toolbar-active');
-            this.toolbar.dispatchEvent(this._hideEvt);
+            this.toolbar.hide();
             return this;
         },
 
         showDialog: function(callback) {
-            callback = typeof(callback) === 'function' ? callback : function() {};
-
-            this.emptyDialog();
-            this.dialog.style.display = 'block';
-            this.controls.style.display = 'none';
-
             var self = this;
+            this.toolbar.showDialog();
+
             setTimeout(function() {
                 self.setToolbarPosition();
-                callback.call(self);
+                if (typeof(callback) === 'function') {
+                    callback.call(self);
+                }
             }, 200);
+
+            return this;
         },
 
         hideDialog: function() {
-            //this.emptyDialog();
-            this.dialog.style.display = 'none';
-            this.controls.style.display = 'block';
+            this.toolbar.hideDialog();
             this.setToolbarPosition();
-        },
-
-        emptyDialog: function() {
-            while (this.dialog.firstChild) {
-                this.dialog.removeChild(this.dialog.firstChild);
-            }
+            return this;
         },
 
         setToolbarPosition: function() {
@@ -215,8 +197,8 @@
                 container = info.container,
                 surrounding = info.surrounding,
                 boundary = container.getBoundingClientRect(),
-                height = this.toolbar.offsetHeight,
-                width = this.toolbar.offsetWidth;
+                height = this.toolbar.element.offsetHeight,
+                width = this.toolbar.element.offsetWidth;
 
             if (surrounding && surrounding.nodeType === 1) {
                 boundary = surrounding.getBoundingClientRect();
@@ -233,20 +215,19 @@
             } else {
                 top = boundary.top + this.options.diffTop + window.pageYOffset - height;
             }
-            this.toolbar.style.top = top + 'px';
 
             // Left position
             var left = boundary.left;
             if (this._currentEditor.offsetWidth < width + boundary.left) {
                 left = this._currentEditor.offsetWidth - width - this.options.diffLeft;
             }
-            this.toolbar.style.left = left + 'px';
+
+            this.toolbar.move(top, left);
         },
 
         _onSelect: function(evt) {
             var elements = [].slice.call(this.elements);
-            elements.push(this.toolbar);
-
+            elements.push(this.toolbar.element);
             if (!this.rangy.dom.hasParents(evt.target, elements)) {
                 this.hideToolbar();
                 this._currentEditor = false;
@@ -254,7 +235,7 @@
             }
 
             this._currentEditor = this._getSelectionElement();
-            if (!this.rangy.dom.hasParents(evt.target, [this.toolbar])) {
+            if (!this.rangy.dom.hasParents(evt.target, [this.toolbar.element])) {
                 this.showToolbar();
             }
         },
@@ -303,7 +284,7 @@
                 node,
                 res = [];
 
-            filter = filter || function(node) { return node; };
+            filter = filter || function(type, name, node) { return node; };
 
             // Set starting point
             if (info.surrounding && info.surrounding.nodeType === 1) {
@@ -366,71 +347,242 @@
         }
     };
 
-    Editor.defaultButtons = [];
+    Editor.defaultItems = [];
 
     Editor.addDefaultButton = function(id, options) {
-        Editor.defaultButtons.push({id: id, options: options});
+        Editor.defaultItems.push({id: id, options: options, type:'button'});
     };
 
-    function Button(editor, id, options) {
-        this.init(editor, id, options);
-    }
+    Editor.addDefaultMenu = function(id, options) {
+        Editor.defaultItems.push({id: id, options: options, type:'menu'});
+    };
 
-    Button.prototype = {
+
+    /*
+     * Toolbar
+     */
+    var Toolbar = Base.extend({
         defaults: {
+            id: 'toolbar',
+            toolbarClass: 'editor-toolbar',
+            dialogClass: 'editor-dialog',
+            buttonClass: 'editor-button',
+            menuClass: 'editor-menu',
+            fontAwesomeEnabled: false
+        },
+
+        initialize: function(options) {
+            this.options = Base.extend(this.defaults, options || {});
+            this.element = document.createElement('div');
+            this.controls = document.createElement('ul');
+            this.dialog = document.createElement('div');
+
+            this.element.id = this.options.id;
+            this.element.classList.add(this.options.toolbarClass);
+            document.body.appendChild(this.element);
+
+            this.dialog.classList.add(this.options.dialogClass);
+            this.dialog.style.display = 'none';
+
+            this.element.appendChild(this.controls);
+            this.element.appendChild(this.dialog);
+            this.element.style.visibility = 'hidden';
+
+            this.items = {};
+            this.drawItems();
+
+            this._showEvt = document.createEvent('Event');
+            this._showEvt.initEvent('toolbar.show', false, true);
+            this._hideEvt = document.createEvent('Event');
+            this._hideEvt.initEvent('toolbar.hide', false, true);
+        },
+
+        click: function(fn) {
+            this.element.addEventListener('click', fn);
+        },
+        focus: function(fn) {
+            this.element.addEventListener('focus', fn);
+        },
+
+        hide: function() {
+            this.element.style.visibility = 'hidden';
+            this.element.dispatchEvent(this._hideEvt);
+        },
+        show: function() {
+            this.element.style.visibility = 'visible';
+            this.element.dispatchEvent(this._showEvt);
+        },
+
+        showDialog: function() {
+            this.emptyDialog();
+            this.dialog.style.display = 'block';
+            this.controls.style.display = 'none';
+        },
+        hideDialog: function() {
+            this.dialog.style.display = 'none';
+            this.controls.style.display = 'block';
+        },
+        emptyDialog: function() {
+            while (this.dialog.firstChild) {
+                this.dialog.removeChild(this.dialog.firstChild);
+            }
+        },
+
+        move: function(top, left) {
+            this.element.style.top = top + 'px';
+            this.element.style.left = left + 'px';
+        },
+
+        addItem: function(Klass, id, options, redraw) {
+            redraw = typeof(redraw) === 'undefined' ? true : redraw;
+            var item = Klass['new'](this, id, options);
+            var el = document.createElement('li');
+            el.appendChild(item.element);
+            this.items[item.id] = {element: el, instance: item};
+
+            if (Menu.isPrototypeOf(item)) {
+                el.appendChild(item.container);
+                el.classList.add(this.options.menuClass);
+            } else {
+                el.classList.add(this.options.buttonClass);
+            }
+
+            if (redraw) {
+                this.drawItems();
+            }
+        },
+
+        addButton: function(id, options, redraw) {
+            this.addItem(Button, id, options, redraw);
+        },
+
+        addMenu: function(id, options, redraw) {
+            this.addItem(Menu, id, options, redraw);
+        },
+
+        removeItem: function(id) {
+            if (!this.items[id]) {
+                return;
+            }
+
+            var el = this.items[id].element;
+
+            while (el.firstChild) {
+                el.removeChild(el.firstChild);
+            }
+            if (el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+            delete(this.items[id]);
+        },
+
+        drawItems: function() {
+            var i, item, parent, sibling,
+                reposition = [];
+
+            while (this.controls.firstChild) {
+                this.controls.removeChild(this.controls.firstChild);
+            }
+
+            for (var id in this.items) {
+                item = this.items[id];
+
+                this.controls.appendChild(item.element);
+
+                if (item.instance.options.after || item.instance.options.menu) {
+                    reposition.push(id);
+                }
+                item.instance.menu = false;
+            }
+
+            for (i=0; i<reposition.length; i++) {
+                item = this.items[reposition[i]];
+
+                // Items in menu
+                if (item.instance.options.menu && !Menu.isPrototypeOf(item.instance)) {
+                    parent = this.items[item.instance.options.menu];
+                    if (parent && Menu.isPrototypeOf(parent.instance)) {
+                        parent.instance.container.appendChild(item.element);
+                        item.instance.menu = parent.instance;
+                        item.instance.setLabel();
+                    }
+                }
+
+                // Items position
+                if (item.instance.options.after) {
+                    sibling = this.items[item.instance.options.after];
+                    if (sibling) {
+                        sibling.element.parentNode.insertBefore(item.element, sibling.element.nextSibling);
+                    }
+                }
+            }
+
+            return this;
+        }
+    });
+
+    var Item = Base.extend({
+        defaults: {
+            label: null,
             title: '',
             className: null,
-            faId: null,
+            fontAwesomeID: null,
             init: function() {},
-            click: function() {},
             isVisible: null,
             isHighlighted: null
         },
 
-        init: function(editor, id, options) {
+        initialize: function(toolbar, id, options) {
             var self = this;
-            this.editor = editor;
+            this.options = Base.extend(this.defaults, options || {});
+            this.toolbar = toolbar;
             this.id = id;
-            this.options = extend(options, this.defaults);
-
             this.label = this.options.label || this.id;
+            this.className = this.options.className || this.id.toLowerCase().replace(/\s+/, '-');
 
-            // Button element
-            var cls = this.options.className || this.label.toLowerCase().replace(/\s+/, '-');
+            this.element = this._initElement();
+            this.setLabel();
+            this.element.setAttribute('title', this.options.title);
 
-            this.element = document.createElement('button');
-            this.element.classList.add('editor-button-' + cls);
-            if (this.options.title) {
-                this.element.setAttribute('title', this.options.title);
+            // Callbacks
+            if (typeof(this.options.init) === 'function') {
+                this.options.init.call(this);
             }
-
-            var text = document.createTextNode(this.label);
-            if (editor.options.faEnabled && this.options.faId) {
-                var fa = document.createElement('i');
-                var span = document.createElement('span');
-                span.appendChild(text);
-                fa.appendChild(span);
-                fa.classList.add('fa', 'fa-' + this.options.faId);
-                this.element.appendChild(fa);
-            } else {
-                this.element.appendChild(text);
-            }
-
-            this.options.init.call(this);
-            this.element.addEventListener('click', function(evt) {
-                self.options.click.call(self, evt);
-            });
 
             if (typeof(this.options.isVisible) === 'function') {
-                this.editor.toolbar.addEventListener('toolbar.show', function(evt) {
+                this.toolbar.element.addEventListener('toolbar.show', function(evt) {
                     self.setVisibility(self.options.isVisible.call(self, evt));
                 });
             }
 
             if (typeof(this.options.isHighlighted) === 'function') {
-                this.editor.toolbar.addEventListener('toolbar.show', function(evt) {
+                this.toolbar.element.addEventListener('toolbar.show', function(evt) {
                     self.setHighlight(self.options.isHighlighted.call(self, evt));
                 });
+            }
+        },
+
+        _initElement: function() {
+            throw new Error('_initElement not implemented');
+        },
+
+        setLabel: function(label, fontAwesomeID) {
+            label = label || this.label;
+            fontAwesomeID = fontAwesomeID || this.options.fontAwesomeID;
+
+            while (this.element.firstChild) {
+                this.element.removeChild(this.element.firstChild);
+            }
+
+            var text = document.createTextNode(label);
+            if (this.toolbar.options.fontAwesomeEnabled && fontAwesomeID) {
+                var fa = this.getFaElement(fontAwesomeID);
+                var span = document.createElement('span');
+                span.appendChild(text);
+                fa.appendChild(span);
+                this.element.appendChild(fa);
+            } else {
+                this.element.appendChild(text);
             }
         },
 
@@ -450,8 +602,140 @@
             } else {
                 this.element.classList.remove('editor-highlight');
             }
+        },
+
+        getFaElement: function(id) {
+            var el = document.createElement('i');
+            el.classList.add('fa', 'fa-' + id);
+            return el;
         }
-    };
+    });
+
+    var Button = Item.extend({
+        defaults: Base.extend(Item.defaults, {
+            click: null
+        }),
+
+        initialize: function(toolbar, id, options) {
+            var self = this;
+            Item.initialize.call(this, toolbar, id, options);
+
+            this.element.classList.add(
+                this.toolbar.options.buttonClass,
+                this.toolbar.options.buttonClass + '-' + this.className
+            );
+
+            if (typeof(this.options.click) === 'function') {
+                this.element.addEventListener('click', function(evt) {
+                    self.options.click.call(self, evt);
+                });
+            }
+        },
+
+        _initElement: function() {
+            return document.createElement('button');
+        },
+
+        setLabel: function(label, fontAwesomeID) {
+            Item.setLabel.call(this, label, fontAwesomeID);
+
+            if (this.menu && this.options.title) {
+                var el = document.createElement('em');
+                var text = document.createTextNode(' - ' + this.options.title);
+                el.appendChild(text);
+                this.element.appendChild(el);
+            }
+        }
+    });
+
+
+    var Menu = Item.extend({
+        defaults: Base.extend(Item.defaults, {
+            closeDelay: 400
+        }),
+
+        initialize: function(toolbar, id, options) {
+            var self = this;
+            Item.initialize.call(this, toolbar, id, options);
+
+            this.element.classList.add(
+                this.toolbar.options.menuClass,
+                this.toolbar.options.menuClass + '-' + this.className
+            );
+
+            this.container = document.createElement('ul');
+            this.container.style.display = 'none';
+
+            // Open/Close handlers
+            // There are added on toolbar show to avoid mouseover events when toolbar is moving
+            var openHandler = function() {
+                self._open();
+            };
+            var closeHandler = function() {
+                self._closetimer();
+            };
+            var cancelHandler = function() {
+                self._canceltimer();
+            };
+
+            this.toolbar.element.addEventListener('toolbar.show', function() {
+                self._close();
+                self.element.removeEventListener('mouseover', openHandler);
+                self.element.removeEventListener('mouseout', closeHandler);
+                self.container.removeEventListener('mouseover', cancelHandler);
+                self.container.removeEventListener('mouseout', closeHandler);
+
+                setTimeout(function() {
+                    self.element.addEventListener('mouseover', openHandler);
+                    self.element.addEventListener('mouseout', closeHandler);
+                    self.container.addEventListener('mouseover', cancelHandler);
+                    self.container.addEventListener('mouseout', closeHandler);
+                }, 200);
+            });
+        },
+
+        _initElement: function() {
+            return document.createElement('button');
+        },
+
+        setLabel: function(label, fontAwesomeID) {
+            Item.setLabel.call(this, label, fontAwesomeID);
+            var fa = this.getFaElement('chevron-down');
+            this.element.appendChild(document.createTextNode(' '));
+            this.element.appendChild(fa);
+        },
+
+        _open: function() {
+            var item, i;
+
+            // Close all other menus
+            for (i in this.toolbar.items) {
+                item = this.toolbar.items[i];
+                if (Menu.isPrototypeOf(item.instance)) {
+                    item.instance._canceltimer();
+                    item.instance._close();
+                }
+            }
+            this._canceltimer();
+            this.container.style.display = 'block';
+        },
+        _close: function() {
+            this.container.style.display = 'none';
+        },
+        _closetimer: function() {
+            var self = this;
+            this.closeTimeout = setTimeout(function() {
+                self._close();
+            }, this.options.closeDelay);
+        },
+        _canceltimer: function() {
+            if (this.closeTimeout) {
+                clearTimeout(this.closeTimeout);
+                this.closeTimeout = null;
+            }
+        }
+    });
+
 
     return Editor;
 })();
