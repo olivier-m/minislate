@@ -105,11 +105,15 @@
         },
 
         initElements: function() {
+            var self = this;
             this.iter(function(node) {
                 node.setAttribute('contentEditable', true);
                 node.setAttribute('data-editor-element', true);
             });
 
+            this.on('focus', function() {
+                self._onFocus();
+            });
             return this;
         },
 
@@ -200,7 +204,7 @@
                 if (typeof(callback) === 'function') {
                     callback.call(self);
                 }
-            }, 200);
+            }, 20);
 
             return this;
         },
@@ -242,6 +246,10 @@
             }
 
             this.toolbar.move(top, left);
+        },
+
+        _onFocus: function() {
+            this._currentEditor = this._getSelectionElement();
         },
 
         _onSelect: function(evt) {
