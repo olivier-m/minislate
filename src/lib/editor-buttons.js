@@ -345,7 +345,11 @@ Editor.addDefaultButton('image', {
     label: 'IMG',
     title: 'Image',
     className: 'image',
-    fontAwesomeID: 'picture-o'
+    fontAwesomeID: 'picture-o',
+
+    click: function() {
+        window.alert('No implemented yet :)');
+    }
 });
 
 
@@ -354,5 +358,9 @@ Editor.addDefaultButton('embed', {
     label: 'Embeded',
     title: 'Embeded content',
     className: 'oembed',
-    fontAwesomeID: 'youtube-play'
+    fontAwesomeID: 'youtube-play',
+
+    click: function() {
+        window.alert('No implemented yet :)');
+    }
 });
