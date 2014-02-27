@@ -545,6 +545,33 @@
             }
 
             return this;
+        },
+
+        addDialogButton: function(label, options) {
+            var defaults = {
+                click: null,
+                fontAwesomeID: null
+            };
+            options = Base.extend(defaults, options || {});
+
+            var button = document.createElement('button');
+            button.appendChild(document.createTextNode(label));
+            this.dialog.appendChild(document.createTextNode(' '));
+            this.dialog.appendChild(button);
+            this.dialog.appendChild(document.createTextNode(' '));
+
+            if (options.click && typeof(options.click) === 'function') {
+                button.addEventListener('click', options.click);
+            }
+
+            if (options.fontAwesomeID && this.options.fontAwesomeEnabled) {
+                button.removeChild(button.firstChild);
+                button.setAttribute('title', label);
+                var el = Item.getFaElement.call(null, options.fontAwesomeID);
+                button.appendChild(el);
+            }
+
+            return button;
         }
     });
 

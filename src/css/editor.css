@@ -48,7 +48,8 @@ div.editor-toolbar li button {
     outline: none;
 }
 div.editor-toolbar li button::-moz-focus-inner {
-    border:0; padding:0
+    border: 0;
+    padding: 0;
 }
 
 div.editor-toolbar li button:hover {
@@ -110,4 +111,28 @@ div.editor-dialog input[type=text] {
     border: 1px solid #ccc;
     padding: 3px;
     vertical-align: baseline;
+}
+
+div.editor-dialog button {
+    padding: 3px 5px;
+    margin: 0 0 0 4px;
+    cursor: pointer;
+    background-color: #555;
+    background-image: linear-gradient(#555, #444);
+    color: #fff;
+    font-size: 1em;
+    border: 1px solid #666;
+    border-radius: 2px;
+    outline: none;
+}
+div.editor-dialog button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+div.editor-dialog button:hover, div.editor-dialog button:focus {
+    background-image: linear-gradient(#666, #555);
+}
+div.editor-dialog button:active {
+    background-image: linear-gradient(#444, #555);
 }

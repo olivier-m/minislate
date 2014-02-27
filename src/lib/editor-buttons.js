@@ -238,21 +238,47 @@ Editor.addDefaultButton('link', {
         }
 
         var selection = editor.rangy.saveSelection();
+
         editor.showDialog(function() {
             input.focus();
         });
 
         var dialog = this.toolbar.dialog;
+        var input = document.createElement('input');
         var label = document.createElement('label');
         label.appendChild(document.createTextNode('URL: '));
-        var input = document.createElement('input');
         input.setAttribute('size', 30);
         input.setAttribute('type', 'text');
         label.appendChild(input);
         dialog.appendChild(label);
 
+        this.toolbar.addDialogButton('Save', {
+            fontAwesomeID: 'check',
+            click: function(evt) {
+                evt.stopImmediatePropagation();
+                self.options.restoreSelection.call(self, selection);
+                self.options.saveLink.call(self, node, input.value);
+            }
+        });
+
+        this.toolbar.addDialogButton('Cancel', {
+            fontAwesomeID: 'undo',
+            click: function(evt) {
+                evt.stopImmediatePropagation();
+                self.options.restoreSelection.call(self, selection);
+            }
+        });
+
         if (node) {
             input.value = node.getAttribute('href');
+            this.toolbar.addDialogButton('Remove', {
+                fontAwesomeID: 'trash-o',
+                click: function(evt) {
+                    evt.stopImmediatePropagation();
+                    self.options.restoreSelection.call(self, selection);
+                    self.options.saveLink.call(self, node, null);
+                }
+            });
         }
 
         input.addEventListener('keyup', function(evt) {
@@ -281,8 +307,8 @@ Editor.addDefaultButton('link', {
         var r = this.toolbar.editor.rangy;
         r.restoreSelection(selection);
         r.removeMarkers(selection);
-        this.toolbar.editor.showToolbar();
         this.toolbar.editor._getSelectionElement().focus();
+        this.toolbar.editor.showToolbar();
     },
 
     saveLink: function(node, url) {
