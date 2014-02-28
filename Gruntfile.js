@@ -10,7 +10,7 @@ module.exports = function(grunt) {
 
         clean: {
             dist: ['dist/'],
-            tmp: ['tmp/']
+            grunt: ['.grunt/']
         },
 
         connect: {
@@ -46,7 +46,7 @@ module.exports = function(grunt) {
             },
             rangy: {
                 src: 'src/vendor/rangy/core/*.js',
-                dest: 'tmp/rangy/',
+                dest: '.grunt/tmp/rangy/',
                 flatten: true,
                 expand: true,
                 options: {
@@ -61,17 +61,17 @@ module.exports = function(grunt) {
         bundle: {
             rangy: {
                 template: 'build/templates/rangy.js',
-                out: 'tmp/rangy-core.js'
+                out: '.grunt/tmp/rangy-core.js'
             },
             editor: {
                 template: 'build/templates/editor.js',
-                out: 'tmp/<%= pkg.name.toLowerCase() %>.js'
+                out: '.grunt/tmp/<%= pkg.name.toLowerCase() %>.js'
             }
         },
 
         uglify: {
             dist: {
-                src: 'tmp/<%= pkg.name.toLowerCase() %>.js',
+                src: '.grunt/tmp/<%= pkg.name.toLowerCase() %>.js',
                 dest: 'dist/js/<%= pkg.name.toLowerCase() %>.js',
                 options: {
                     mangle: false,
@@ -81,7 +81,7 @@ module.exports = function(grunt) {
                 }
             },
             distmin: {
-                src: 'tmp/<%= pkg.name.toLowerCase() %>.js',
+                src: '.grunt/tmp/<%= pkg.name.toLowerCase() %>.js',
                 dest: 'dist/js/<%= pkg.name.toLowerCase() %>.min.js'
             }
         },
@@ -89,7 +89,7 @@ module.exports = function(grunt) {
         watch: {
             dev: {
                 files: ['src/**', 'build/templates/*'],
-                tasks: ['build', 'uglify:dist', 'concat:css', 'copy:css', 'clean:tmp']
+                tasks: ['build', 'uglify:dist', 'concat:css', 'copy:css', 'clean:grunt']
             }
         }
     });
@@ -103,7 +103,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('build', ['rangy', 'bundle:editor']);
-    grunt.registerTask('dist', ['build', 'uglify', 'concat:css', 'copy:css', 'clean:tmp']);
+    grunt.registerTask('dist', ['build', 'uglify', 'concat:css', 'copy:css', 'clean:grunt']);
     grunt.registerTask('rangy', ['copy:rangy', 'bundle:rangy']);
     grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch:dev']);
 };

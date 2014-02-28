@@ -2,17 +2,17 @@
 var _module = {};
 (function() {
 
-{% include "tmp/rangy/core.js" %}
+{% include ".grunt/tmp/rangy/core.js" %}
 }).call(_module);
 
 var rangy = _module.rangy;
 _module = undefined;
 
-{% include "tmp/rangy/dom.js" %}
-{% include "tmp/rangy/domrange.js" %}
-{% include "tmp/rangy/wrappedrange.js" %}
-{% include "tmp/rangy/wrappedselection.js" %}
-{% include "tmp/rangy/selectionsaverestore.js" %}
+{% include ".grunt/tmp/rangy/dom.js" %}
+{% include ".grunt/tmp/rangy/domrange.js" %}
+{% include ".grunt/tmp/rangy/wrappedrange.js" %}
+{% include ".grunt/tmp/rangy/wrappedselection.js" %}
+{% include ".grunt/tmp/rangy/selectionsaverestore.js" %}
 
 return rangy;
 })();

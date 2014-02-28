@@ -9,7 +9,7 @@
 }('Foxypen', function(undefined) {
 
 //<<-- RANGY
-var rangy = {% include "tmp/rangy-core.js" %}
+var rangy = {% include ".grunt/tmp/rangy-core.js" %}
 rangy.config = {
     alertOnFail: false,
     alertOnWarn: false,
