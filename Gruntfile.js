@@ -4,13 +4,14 @@ module.exports = function(grunt) {
     'use strict';
 
     var utils = require('./build/utils');
+    var pkg = grunt.file.readJSON('package.json');
 
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
+        pkg: pkg,
 
         clean: {
             dist: ['dist/'],
-            grunt: ['.grunt/']
+            tmp: ['.grunt/tmp']
         },
 
         connect: {
@@ -65,7 +66,15 @@ module.exports = function(grunt) {
             },
             editor: {
                 template: 'build/templates/editor.js',
-                out: '.grunt/tmp/<%= pkg.name.toLowerCase() %>.js'
+                out: '.grunt/tmp/<%= pkg.name.toLowerCase() %>.js',
+                context: {
+                    name: pkg.name,
+                    author: pkg.author.name,
+                    version: pkg.version,
+                    license: pkg.license,
+                    year: (new Date()).getFullYear(),
+                    date: (new Date()).toUTCString()
+                }
             }
         },
 
@@ -77,19 +86,23 @@ module.exports = function(grunt) {
                     mangle: false,
                     compress: false,
                     beautify: true,
-                    preserveComment: false
+                    preserveComments: 'some'
                 }
             },
             distmin: {
                 src: '.grunt/tmp/<%= pkg.name.toLowerCase() %>.js',
-                dest: 'dist/js/<%= pkg.name.toLowerCase() %>.min.js'
+                dest: 'dist/js/<%= pkg.name.toLowerCase() %>.min.js',
+                options: {
+                    banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - '+
+                    '<%= grunt.template.today("isoUtcDateTime") %> - <%= pkg.author.name %> and contributors. */\n'
+                }
             }
         },
 
         watch: {
             dev: {
                 files: ['src/**', 'build/templates/*'],
-                tasks: ['build', 'uglify:dist', 'concat:css', 'copy:css', 'clean:grunt']
+                tasks: ['build', 'uglify:dist', 'concat:css', 'copy:css', 'clean:tmp']
             }
         }
     });
@@ -103,7 +116,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('build', ['rangy', 'bundle:editor']);
-    grunt.registerTask('dist', ['build', 'uglify', 'concat:css', 'copy:css', 'clean:grunt']);
+    grunt.registerTask('dist', ['build', 'uglify', 'concat:css', 'copy:css', 'clean:tmp']);
     grunt.registerTask('rangy', ['copy:rangy', 'bundle:rangy']);
     grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch:dev']);
 };

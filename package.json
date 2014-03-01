@@ -2,6 +2,10 @@
   "name": "Foxypen",
   "version": "0.1.0",
   "description": "Foxypen is a HTML5 visual editor",
+  "author": {
+    "name": "Olivier Meunier",
+    "email": "olivier@neokraft.net"
+  },
   "main": "src/main.js",
   "license": "MIT",
   "devDependencies": {

@@ -1,3 +1,15 @@
+/*!
+ * {{name}} JavaScript WYSIWYG Editor
+ * Version: {{version}}
+ *
+ * Includes Rangy
+ * https://code.google.com/p/rangy/
+ *
+ * Copyright {{year}}, {{author}} and contributors
+ * Released under the {{license}} license
+ *
+ * Date: {{date}}
+ */
 (function(name, definition) {
     if (typeof module !== 'undefined') {
         module.exports = definition();
@@ -25,6 +37,7 @@ rangy.config = {
 
 //<<-- EDITOR
 var editor = {% include "src/main.js" %}
+editor.VERSION = "{{version}}";
 // EDITOR -->>
 
 //<<-- BUTTONS
