@@ -87,8 +87,8 @@ for (var i=0; i<levels.length; i++) {
 // Preformated text
 Editor.addDefaultButton('pre', Editor.getBlockButtonSpec('pre', ['pre'], {
     label: '<>',
-    title: 'Preformated',
-    className: 'pre',
+    title: 'Code',
+    fontAwesomeID: 'code',
     menu: 'blocks',
     init: function() {
         var editor = this.toolbar.editor;
@@ -258,14 +258,6 @@ Editor.addDefaultButton('link', {
                 evt.stopImmediatePropagation();
                 self.options.restoreSelection.call(self, selection);
                 self.options.saveLink.call(self, node, input.value);
-            }
-        });
-
-        this.toolbar.addDialogButton('Cancel', {
-            fontAwesomeID: 'undo',
-            click: function(evt) {
-                evt.stopImmediatePropagation();
-                self.options.restoreSelection.call(self, selection);
             }
         });
 
