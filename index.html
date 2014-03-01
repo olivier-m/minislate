@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8' />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" type="text/css" media="all" href="style.css">
+  <link rel="stylesheet" type="text/css" media="all" href="dist/css/minislate-full.css">
+  <title>Minislate</title>
+</head>
+
+<body>
+  <section>
+    <header>
+      <h1>Minislate</h1>
+      <p>A wysiwyg experiment</p>
+    </header>
+
+    <article>
+      <p>This is Minislate, a minimalist, opinionated WYSIWYG editor. It aims at getting things
+      right and avoiding common pitfalls of web editors.</p>
+      <ul>
+        <li><a href="#demo">Demonstration</a></li>
+        <li><a href="#download">Download and install</a></li>
+        <li><a href="#sources">Contribute</a></li>
+      </ul>
+    </article>
+  </section>
+
+  <section>
+    <header>
+      <h2>Minimalist &amp; opinionated</h2>
+    </header>
+    <article>
+      <p>One of the most challenging tasks with web editors is to keep it as simple as possible
+      while having it work on major platforms. Here are some strong principles followed by Minislate:</p>
+
+      <ul>
+        <li>What you need, when you need it, based on context</li>
+        <li>Extensible components (buttons and menus)</li>
+        <li>Vanilla JavaScript. No framework, keep yours!</li>
+      </ul>
+    </article>
+  </section>
+
+  <section>
+    <header>
+      <h2>Features</h2>
+    </header>
+    <article>
+      <p>At the moment, the following features are implemented:</p>
+
+      <ul>
+        <li>Paragraph, headers, code blocks</li>
+        <li>Lists</li>
+        <li>Inline (bold, italic, underline, strike-through)</li>
+        <li>Links</li>
+      </ul>
+
+      <p>The context base behavior means only relevant buttons or menus are shown when you place
+      your cursor on some place or when you select some text. Depending on your selection, different
+      buttons and menus will be highlighted.</p>
+
+      <p>Minislate was tested on the following browsers:</p>
+
+      <ul>
+        <li>Firefox 27 (should work on 4+)</li>
+        <li>Chromium 31</li>
+        <li>Safari 6.1.1</li>
+      </ul>
+
+      <p>It might work on others but I have no idea yet. One thing at a time :)</p>
+    </article>
+  </section>
+
+  <section>
+    <header>
+      <h2>Goals</h2>
+    </header>
+    <article>
+      <p>Minislate is an experiment. It may become a release if the following goals are reached at
+      some point:</p>
+
+      <ul>
+        <li>Semantic inline tags (strong, em, etc.)</li>
+        <li>Inserting images in content</li>
+        <li>Inserting <a href="http://www.oembed.com/">oembed</a> compatible contents</li>
+        <li>List indentation (sublist)</li>
+        <li>Quotes</li>
+      </ul>
+    </article>
+  </section>
+
+  <section id="demo">
+    <header>
+      <h2>Demo</h2>
+    </header>
+    <article contenteditable="true" class="editor">
+      <p>This is the unavoidable demo. You can edit this text as you wish.</p>
+
+      <h3>Some sample text</h3>
+      <p>Play around with inline formatting and links.</p>
+
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vel sodales nunc. Phasellus
+      elit augue, interdum <a href="http://google.com/">tristique nisl</a> ut, ultricies mattis
+      elit. Mauris eu fringilla lacus. Vestibulum ac erat vel mi <strong>accumsan</strong> cursus
+      sit amet dapibus mi. Praesent iaculis tempor dictum. Donec eu lorem et turpis tincidunt
+      congue. Sed <em><strong>sagittis</strong></em> diam ut felis iaculis euismod.</p>
+
+      <ol>
+        <li>A rainbow!</li>
+        <li>A double rainbow!!</li>
+      </ol>
+
+      <h3>Context</h3>
+      <p>Context is key. If you place your cursor on <strong>this part</strong> the “bold”
+      button will be shown and highlighted. If you encounter a <a href="http://wikipedia.org/">link</a>,
+      you can edit or remove it very easily.</p>
+
+      <h3>Shortcuts</h3>
+      <p>Minislate provides the following shortcuts:</p>
+
+      <ul>
+        <li><strong>Bold</strong>: cmd+b or ctrl+b</li>
+        <li><strong>Italic</strong>: cmd+i or ctrl+i</li>
+        <li><strong>Link</strong>: cmd+shift+k or ctrl+shift+k</li>
+      </ul>
+
+    </article>
+  </section>
+
+  <section id="download">
+    <header>
+      <h2>Download &amp; install</h2>
+    </header>
+    <article>
+      <p><strong>Disclaimer:</strong> For the moment, Minislate is an alpha quality software with known
+      and unknown bugs. You've been warned.</p>
+    </article>
+  </section>
+
+  <section id="sources">
+    <header>
+      <h2>License &amp; sources</h2>
+    </header>
+    <article>
+      <p>Minislate is released under the terms of the
+      <a href="http://www.opensource.org/licenses/MIT">MIT license</a>, which means “do whatever
+      you want as long as you don't change the license and/or the copyright notice.”</p>
+
+      <p>Minislate uses the amazing <a href="https://code.google.com/p/rangy/">Rangy</a> library,
+      released under the terms of the MIT license.</p>
+
+      <p>In its full version Minislate includes
+      <a href="http://fontawesome.io/">Font Awesome</a> by Dave Gandy,
+      released under the terms of this MIT license (code) and the SIL OFL license (font).</p>
+    </article>
+  </section>
+
+  <script src="dist/js/minislate.min.js"></script>
+  <script>
+  window.addEventListener('DOMContentLoaded', function() {
+    var editor = new Minislate('.editor', {
+    });
+  });
+  </script>
+</body>
+</html>
