@@ -18,7 +18,7 @@
     } else {
         this[name] = definition();
     }
-}('Foxypen', function(undefined) {
+}('Minislate', function(undefined) {
 
 //<<-- RANGY
 var rangy = {% include ".grunt/tmp/rangy-core.js" %}

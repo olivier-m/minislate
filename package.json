@@ -1,7 +1,7 @@
 {
-  "name": "Foxypen",
+  "name": "Minislate",
   "version": "0.1.0",
-  "description": "Foxypen is a HTML5 visual editor",
+  "description": "Minislate is a HTML5 WYSIWYG editor",
   "author": {
     "name": "Olivier Meunier",
     "email": "olivier@neokraft.net"
