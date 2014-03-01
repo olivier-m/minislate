@@ -4,10 +4,20 @@
   <meta charset="UTF-8">
   <title>Editor demo</title>
   <link rel="stylesheet" href="css/minislate-full.css" />
+  <style type="text/css">
+  body {
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+    font-size: 16px;
+  }
+  #editable, #noneditable {
+    width: 80%;
+    margin: 0 auto;
+  }
+  </style>
 </head>
 <body>
 
-<div class="editable" style="width:80%">
+<div id="editable">
 <h1>Test</h1>
 
 
@@ -25,15 +35,17 @@ id tortor et, facilisis malesuada eros. Nam vitae eleifend augue. Pellentesque e
 feugiat vehicula vel sit amet enim.</p>
 </div>
 
+<div id="noneditable">
 <h2>Non editable</h2>
 
 <p>Quisque id tortor lectus. Cras non leo non metus luctus faucibus. Sed in nisl ultricies,
 venenatis turpis id, dignissim eros. Donec pharetra gravida ligula at consequat.</p>
+</div>
 
 <script src="js/minislate.js"></script>
 <script>
 window.addEventListener('DOMContentLoaded', function() {
-  window.editor = new Minislate('.editable', {
+  window.editor = new Minislate('#editable', {
   });
 });
 
