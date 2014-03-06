@@ -134,6 +134,16 @@ module.exports = function(grunt) {
                 files: ['src/**', 'build/templates/*'],
                 tasks: ['build', 'uglify:dist', 'concat:css', 'copy:css', 'clean:tmp']
             }
+        },
+
+        'gh-pages': {
+            options: {
+                push: false,
+                message: 'Automatic update',
+                clone: '.grunt/gh-pages',
+                add: true
+            },
+            src: ['dist/**']
         }
     });
 
@@ -145,10 +155,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-gh-pages');
     grunt.loadNpmTasks('grunt-zip');
 
     grunt.registerTask('build', ['rangy', 'bundle:editor']);
     grunt.registerTask('dist', ['build', 'uglify', 'concat:css', 'copy:css', 'cssmin', 'zip', 'clean:tmp']);
     grunt.registerTask('rangy', ['copy:rangy', 'bundle:rangy']);
     grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch:dev']);
+    grunt.registerTask('release', ['clean', 'dist', 'gh-pages']);
 };
