@@ -8,7 +8,7 @@
  * Copyright 2014, Olivier Meunier and contributors
  * Released under the MIT license
  *
- * Date: Thu, 06 Mar 2014 18:16:20 GMT
+ * Date: Thu, 06 Mar 2014 18:42:58 GMT
  */
 (function(name, definition) {
     if (typeof module !== "undefined") {
