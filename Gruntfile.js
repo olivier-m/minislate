@@ -99,6 +99,36 @@ module.exports = function(grunt) {
             }
         },
 
+        cssmin: {
+            simple: {
+                src: 'dist/css/<%= pkg.name.toLowerCase() %>.css',
+                dest: 'dist/css/<%= pkg.name.toLowerCase() %>.min.css'
+            },
+            full: {
+                src: 'dist/css/<%= pkg.name.toLowerCase() %>-full.css',
+                dest: 'dist/css/<%= pkg.name.toLowerCase() %>-full.min.css',
+                options: {
+                    keepSpecialComments: '0'
+                }
+            }
+        },
+
+        zip: {
+            dist: {
+                dest: 'dist/<%= pkg.name.toLowerCase() %>-<%= pkg.version %>.zip',
+                src: ['README.md', 'LICENSE', 'demo/index.html', 'dist/js/**', 'dist/css/**'],
+                router: function(path) {
+                    var re_dist = /^dist\/(.+)$/;
+                    if (path.match(re_dist)) {
+                        path =  path.replace(re_dist, '$1');
+                    } else if (path === 'demo/index.html') {
+                        path = 'demo.html';
+                    }
+                    return 'minislate-' + pkg.version + '/' + path;
+                }
+            }
+        },
+
         watch: {
             dev: {
                 files: ['src/**', 'build/templates/*'],
@@ -112,11 +142,13 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-zip');
 
     grunt.registerTask('build', ['rangy', 'bundle:editor']);
-    grunt.registerTask('dist', ['build', 'uglify', 'concat:css', 'copy:css', 'clean:tmp']);
+    grunt.registerTask('dist', ['build', 'uglify', 'concat:css', 'copy:css', 'cssmin', 'zip', 'clean:tmp']);
     grunt.registerTask('rangy', ['copy:rangy', 'bundle:rangy']);
     grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch:dev']);
 };
