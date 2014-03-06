@@ -15,7 +15,7 @@ Minislate:
 
 ## Download and install
 
-First, [download Minislate](http://olivier-m.github.io/minislate), unzip it and copy the
+First, [download Minislate](http://olivier-m.github.io/minislate/dist/minislate.zip), unzip it and copy the
 following files to a location of your choice:
 
 - `css/minislate-full.min.css`

@@ -115,7 +115,7 @@ module.exports = function(grunt) {
 
         zip: {
             dist: {
-                dest: 'dist/<%= pkg.name.toLowerCase() %>-<%= pkg.version %>.zip',
+                dest: 'dist/<%= pkg.name.toLowerCase() %>.zip',
                 src: ['README.md', 'LICENSE', 'demo/index.html', 'dist/js/**', 'dist/css/**'],
                 router: function(path) {
                     var re_dist = /^dist\/(.+)$/;
