@@ -242,7 +242,9 @@
             // Left position
             var left = boundary.left;
             if (this._currentEditor.offsetWidth < width + boundary.left) {
-                left = this._currentEditor.offsetWidth - width - this.options.diffLeft;
+                left =
+                    this._currentEditor.offsetWidth + this._currentEditor.offsetLeft -
+                    width - this.options.diffLeft;
             }
 
             this.toolbar.move(top, left);
