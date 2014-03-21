@@ -10,8 +10,9 @@ One of the most challenging tasks with web editors is to keep it as simple as po
 while having it work on major platforms. Here are some strong principles followed by
 Minislate:
 
- - What you need, when you need it, based on context Extensible components (buttons and
- - menus) Vanilla JavaScript. No framework, keep yours!
+ - What you need, when you need it, based on context
+ - Extensible components (buttons and menus)
+ - Vanilla JavaScript. No framework, keep yours!
 
 ## Download and install
 
