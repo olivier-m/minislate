@@ -225,7 +225,8 @@ Editor.addDefaultButton('link', {
     click: function() {
         var self = this,
             editor = this.toolbar.editor,
-            info = editor.getRangeInfo();
+            info = editor.getRangeInfo(),
+            dialog = this.toolbar.newDialog();
 
         var node = editor.filterSelectionNodeName('a');
         if (info.range.collapsed && node.length === 0) {
@@ -243,16 +244,17 @@ Editor.addDefaultButton('link', {
             input.focus();
         });
 
-        var dialog = this.toolbar.dialog;
-        var input = document.createElement('input');
-        var label = document.createElement('label');
-        label.appendChild(document.createTextNode('URL: '));
-        input.setAttribute('size', 30);
-        input.setAttribute('type', 'text');
-        label.appendChild(input);
-        dialog.appendChild(label);
+        var input = dialog.addTextField('URL: ', {
+            escape: function() {
+                self.options.restoreSelection.call(self, selection);
+            },
+            enter: function(evt) {
+                self.options.restoreSelection.call(self, selection);
+                self.options.saveLink.call(self, node, evt.target.value);
+            }
+        });
 
-        this.toolbar.addDialogButton('Save', {
+        dialog.addButton('Save', {
             fontAwesomeID: 'check',
             click: function(evt) {
                 evt.stopImmediatePropagation();
@@ -263,8 +265,8 @@ Editor.addDefaultButton('link', {
 
         if (node) {
             input.value = node.getAttribute('href');
-            this.toolbar.addDialogButton('Remove', {
-                fontAwesomeID: 'trash-o',
+            dialog.addButton('Remove', {
+                fontAwesomeID: 'chain-broken',
                 click: function(evt) {
                     evt.stopImmediatePropagation();
                     self.options.restoreSelection.call(self, selection);
@@ -272,27 +274,6 @@ Editor.addDefaultButton('link', {
                 }
             });
         }
-
-        input.addEventListener('keyup', function(evt) {
-            evt.stopImmediatePropagation();
-            var ENTER = 13,
-                ESC = 27;
-
-            if ([ENTER, ESC].indexOf(evt.which) === -1) {
-                return;
-            }
-
-            // Restore selection and remove dialog
-            self.options.restoreSelection.call(self, selection);
-
-            if (evt.which === ESC) {
-                // Stop on ESC
-                return;
-            }
-
-            // ENTER key
-            self.options.saveLink.call(self, node, evt.target.value);
-        });
     },
 
     restoreSelection: function(selection) {
