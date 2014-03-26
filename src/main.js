@@ -250,6 +250,17 @@
             this.toolbar.move(top, left);
         },
 
+        restoreSelection: function(selection, showToolbar) {
+            showToolbar = typeof(showToolbar) === 'undefined' ? true : showToolbar;
+
+            this.rangy.restoreSelection(selection);
+            this.rangy.removeMarkers(selection);
+            this._getSelectionElement().focus();
+            if (showToolbar) {
+                this.showToolbar();
+            }
+        },
+
         _onFocus: function() {
             this._currentEditor = this._getSelectionElement();
         },

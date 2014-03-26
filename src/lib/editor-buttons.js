@@ -246,10 +246,10 @@ Editor.addDefaultButton('link', {
 
         var input = dialog.addTextField('URL: ', {
             escape: function() {
-                self.options.restoreSelection.call(self, selection);
+                editor.restoreSelection(selection);
             },
             enter: function(evt) {
-                self.options.restoreSelection.call(self, selection);
+                editor.restoreSelection(selection);
                 self.options.saveLink.call(self, node, evt.target.value);
             }
         });
@@ -258,7 +258,7 @@ Editor.addDefaultButton('link', {
             fontAwesomeID: 'check',
             click: function(evt) {
                 evt.stopImmediatePropagation();
-                self.options.restoreSelection.call(self, selection);
+                editor.restoreSelection(selection);
                 self.options.saveLink.call(self, node, input.value);
             }
         });
@@ -269,19 +269,11 @@ Editor.addDefaultButton('link', {
                 fontAwesomeID: 'chain-broken',
                 click: function(evt) {
                     evt.stopImmediatePropagation();
-                    self.options.restoreSelection.call(self, selection);
+                    editor.restoreSelection(selection);
                     self.options.saveLink.call(self, node, null);
                 }
             });
         }
-    },
-
-    restoreSelection: function(selection) {
-        var r = this.toolbar.editor.rangy;
-        r.restoreSelection(selection);
-        r.removeMarkers(selection);
-        this.toolbar.editor._getSelectionElement().focus();
-        this.toolbar.editor.showToolbar();
     },
 
     saveLink: function(node, url) {
