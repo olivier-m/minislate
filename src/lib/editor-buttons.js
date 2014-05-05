@@ -312,8 +312,74 @@ Editor.addDefaultButton('image', {
     className: 'image',
     fontAwesomeID: 'picture-o',
 
+    init: function() {
+        var editor = this.toolbar.editor;
+        editor.on('click', function(evt) {
+            if (evt.target.tagName.toLowerCase() === 'img') {
+                editor.setRange(evt.target);
+                editor.showToolbar();
+            }
+        });
+    },
+
+    isHighlighted: function() {
+        return this.toolbar.editor.filterSelectionNodeName('img').length > 0;
+    },
+
     click: function() {
-        window.alert('No implemented yet :)');
+        var self = this,
+            editor = this.toolbar.editor,
+            dialog = this.toolbar.newDialog();
+
+        var node = editor.filterSelectionNodeName('img');
+
+        node = node.length === 0 ? null : node[0];
+
+        var selection = editor.rangy.saveSelection();
+
+        editor.showDialog(function() {
+            input.focus();
+        });
+
+        var input = dialog.addTextField('URL: ', {
+            escape: function() {
+                editor.restoreSelection(selection);
+            },
+            enter: function(evt) {
+                editor.restoreSelection(selection);
+                self.options.saveImage.call(self, node, evt.target.value);
+            }
+        });
+
+        dialog.addButton('Save', {
+            fontAwesomeID: 'check',
+            click: function(evt) {
+                evt.stopImmediatePropagation();
+                editor.restoreSelection(selection);
+                self.options.saveImage.call(self, node, input.value);
+            }
+        });
+
+        if (node) {
+            input.value = node.getAttribute('src');
+        }
+    },
+
+    saveImage: function(node, url) {
+        var editor = this.toolbar.editor,
+            info = editor.getRangeInfo();
+
+        if (node && url) {
+            node.setAttribute('src', url);
+            editor.setRange(node);
+        } else if (url) {
+            var img = document.createElement('img');
+            img.setAttribute('src', url);
+            info.range.deleteContents();
+            info.range.insertNode(img);
+            editor.setRange(img);
+        }
+        editor.showToolbar();
     }
 });
 
