@@ -6,18 +6,19 @@ div.editor-toolbar {
     left: 0;
     z-index: 2000;
 
-    background-color: #333;
-    color: #fff;
-    border: 1px solid #000;
-    border-radius: 3px;
+    background-color: @editor-bgcolor;
+    color: @editor-fgcolor;
+    border: 1px solid lighten(@editor-bgcolor, -20%);
 
     font-family: sans-serif;
     font-size: 16px;
 
-    box-shadow: 2px 5px 8px rgba(0,0,0, 0.6);
+    .border-radius(3px);
+    .drop-shadow();
+    .animation(pop-upwards 100ms forward linear);
 
-    animation: pop-upwards 100ms forward linear;
-    transition: top .1s ease-out, left .1s ease-out;
+    @tr: top .1s ease-out, left .1s ease-out;
+    .transition(@tr);
 }
 
 div.editor-toolbar ul {
@@ -26,7 +27,7 @@ div.editor-toolbar ul {
     padding: 0;
     list-style: none;
     width: 100%;
-    background-image: linear-gradient(#333, #111);
+    .gradient(@start: @editor-bgcolor, @stop: lighten(@editor-bgcolor, -13.33%));
 }
 div.editor-toolbar li {
     display: block;
@@ -35,106 +36,108 @@ div.editor-toolbar li {
     padding: 0;
     line-height: 1;
     font-size: 13px;
-}
-div.editor-toolbar li button {
-    display: block;
-    padding: 8px 10px;
-    margin: 0;
-    cursor: pointer;
-    background-color: transparent;
-    color: #fff;
-    font-size: 1em;
-    border: 0;
-    border-right: 1px solid #000;
-    border-left: 1px solid #333;
-    outline: none;
-}
-div.editor-toolbar li button::-moz-focus-inner {
-    border: 0;
-    padding: 0;
-}
 
-div.editor-toolbar li button:hover {
-    background-color: #222;
-    background-image: linear-gradient(#444, #222);
-}
-div.editor-toolbar li button.editor-highlight, div.editor-toolbar li button:active {
-    background-color: #444;
-    background-image: linear-gradient(#333, #666);
-}
-div.editor-toolbar li button.editor-highlight:hover {
-    background-color: #555;
-    background-image: linear-gradient(#444, #777);
-}
+    button {
+        display: block;
+        padding: 8px 10px;
+        margin: 0;
+        cursor: pointer;
+        background-color: transparent;
+        color: @editor-fgcolor;
+        font-size: 1em;
+        border: 0;
+        border-right: 1px solid lighten(@editor-bgcolor, -26.66%);
+        border-left: 1px solid @editor-bgcolor;
+        outline: none;
 
-div.editor-toolbar li.editor-menu ul {
-    position: absolute;
-    border-radius: 3px;
-    box-shadow: 2px 5px 8px rgba(0,0,0, 0.6);
-    width: auto;
-}
-div.editor-toolbar li.editor-menu ul li {
-    float: none;
-    display: block;
-}
-div.editor-toolbar li.editor-menu ul li button em {
-    font-size: 0.8em;
-    font-style: normal;
-    color: #bbb;
-}
-div.editor-toolbar li.editor-menu ul li button {
-    width: 10em;
-    text-align: left;
-    border: 0;
-    border-bottom: 1px solid #000;
-    border-top: 1px solid #333;
-}
+        &::-moz-focus-inner {
+            border: 0;
+            padding: 0;
+        }
 
-div.editor-toolbar li button i.fa span {
-    display: none;
-}
-div.editor-toolbar li button i.fa {
-    font-weight: normal;
-}
-div.editor-toolbar li button.editor-menu i.fa-chevron-down {
-    font-size: 0.8em;
-    color: #888;
+        &:hover {
+            .gradient(@start: lighten(@editor-bgcolor, 6.66%), @stop: lighten(@editor-bgcolor, -6.66%));
+        }
+
+        &.editor-highlight, &:active {
+            .gradient(@start: @editor-bgcolor, @stop: lighten(@editor-bgcolor, 13.33%));
+        }
+        &.editor-highlight:hover {
+            .gradient(@start: lighten(@editor-bgcolor, 6.66%), @stop: lighten(@editor-bgcolor, 26.66%));
+        }
+
+        i.fa {
+            font-weight: normal;
+            span {
+                display: none;
+            }
+        }
+    }
+
+    &.editor-menu ul {
+        position: absolute;
+        border-radius: 3px;
+        width: auto;
+        .drop-shadow();
+
+        li {
+            float: none;
+            display: block;
+
+            button {
+                width: 10em;
+                text-align: left;
+                border: 0;
+                border-bottom: 1px solid lighten(@editor-bgcolor, -26.66%);
+                border-top: 1px solid @editor-bgcolor;
+
+                em {
+                    font-size: 0.8em;
+                    font-style: normal;
+                    color: lighten(@editor-fgcolor, -26.66%);
+                }
+            }
+        }
+    }
+    &.editor-menu i.fa-chevron-down {
+        font-size: 0.8em;
+        color: lighten(@editor-fgcolor, -50%);
+    }
 }
 
 div.editor-dialog {
-    border-top: 1px solid #000;
     padding: 6px;
     font-size: 12px;
-}
 
-div.editor-dialog input[type=text] {
-    background: #ccc;
-    color: #000;
-    border: 1px solid #ccc;
-    padding: 3px;
-    vertical-align: baseline;
-}
+    input[type=text] {
+        background: @editor-input-bgcolor;
+        color: @editor-input-fgcolor;
+        border: 1px solid lighten(@editor-input-bgcolor, -13.33%);
+        padding: 3px;
+        vertical-align: baseline;
+    }
 
-div.editor-dialog button {
-    padding: 3px 5px;
-    margin: 0 0 0 4px;
-    cursor: pointer;
-    background-color: #555;
-    background-image: linear-gradient(#555, #444);
-    color: #fff;
-    font-size: 1em;
-    border: 1px solid #666;
-    border-radius: 2px;
-    outline: none;
-}
-div.editor-dialog button::-moz-focus-inner {
-    border: 0;
-    padding: 0;
-}
+    button {
+        padding: 3px 5px;
+        margin: 0 0 0 4px;
+        cursor: pointer;
+        .gradient(lighten(@editor-bgcolor, 13.33%), lighten(@editor-bgcolor, 6.66%));
+        color: @editor-fgcolor;
+        font-size: 1em;
+        border: 1px solid lighten(@editor-bgcolor, 19.99%);
+        border-radius: 2px;
+        outline: none;
 
-div.editor-dialog button:hover, div.editor-dialog button:focus {
-    background-image: linear-gradient(#666, #555);
-}
-div.editor-dialog button:active {
-    background-image: linear-gradient(#444, #555);
+        &::-moz-focus-inner {
+            border: 0;
+            padding: 0;
+        }
+
+        &:hover, &:focus {
+            background-image: linear-gradient(lighten(@editor-bgcolor, 19.99%), lighten(@editor-bgcolor, 13.33%));
+        }
+        &:active {
+            background-image: linear-gradient(lighten(@editor-bgcolor, 6.66%), lighten(@editor-bgcolor, 13.33%));
+        }
+    }
 }
