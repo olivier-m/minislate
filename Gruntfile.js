@@ -21,27 +21,12 @@ module.exports = function(grunt) {
             }
         },
 
-        concat: {
-            css: {
-                src: ['src/css/font-awesome.css', 'src/css/editor.css'],
-                dest: 'dist/css/<%= pkg.name.toLowerCase() %>-full.css'
-            }
-        },
-
         copy: {
-            css: {
-                files: [
-                    {
-                        src: 'src/css/editor.css',
-                        dest: 'dist/css/<%= pkg.name.toLowerCase() %>.css'
-                    },
-                    {
-                        expand: true,
-                        cwd: 'src/css/fonts',
-                        src: '**',
-                        dest: 'dist/css/fonts'
-                    }
-                ]
+            fonts: {
+                expand: true,
+                cwd: 'src/css/fonts',
+                src: '**',
+                dest: 'dist/css/fonts'
             },
             dist: {
                 src: 'dist/js/<%= pkg.name.toLowerCase() %>.js',
@@ -62,6 +47,24 @@ module.exports = function(grunt) {
                     bundleOptions: {
                         standalone: 'Minislate'
                     }
+                }
+            }
+        },
+
+        less: {
+            dev: {
+                files: {
+                    'dist/css/<%= pkg.name.toLowerCase() %>.css': 'src/css/editor.less',
+                    'dist/css/<%= pkg.name.toLowerCase() %>-full.css': 'src/css/editor-full.less'
+                }
+            },
+            dist: {
+                files: {
+                    'dist/css/<%= pkg.name.toLowerCase() %>.min.css': 'src/css/editor.less',
+                    'dist/css/<%= pkg.name.toLowerCase() %>-full.min.css': 'src/css/editor-full.less'
+                },
+                options: {
+                    cleancss: true
                 }
             }
         },
@@ -100,20 +103,6 @@ module.exports = function(grunt) {
             }
         },
 
-        cssmin: {
-            simple: {
-                src: 'dist/css/<%= pkg.name.toLowerCase() %>.css',
-                dest: 'dist/css/<%= pkg.name.toLowerCase() %>.min.css'
-            },
-            full: {
-                src: 'dist/css/<%= pkg.name.toLowerCase() %>-full.css',
-                dest: 'dist/css/<%= pkg.name.toLowerCase() %>-full.min.css',
-                options: {
-                    keepSpecialComments: '0'
-                }
-            }
-        },
-
         zip: {
             dist: {
                 dest: 'dist/<%= pkg.name.toLowerCase() %>.zip',
@@ -133,7 +122,7 @@ module.exports = function(grunt) {
         watch: {
             dev: {
                 files: ['package.json', 'src/**'],
-                tasks: ['build', 'copy:dist', 'uglify:dist', 'concat:css', 'copy:css']
+                tasks: ['build', 'copy:dist', 'uglify:dist', 'less:dev', 'copy:fonts']
             }
         },
 
@@ -150,17 +139,16 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-gh-pages');
     grunt.loadNpmTasks('grunt-zip');
 
     grunt.registerTask('build', ['browserify']);
-    grunt.registerTask('dist', ['build', 'copy:dist', 'uglify', 'concat:css', 'copy:css', 'cssmin', 'zip']);
+    grunt.registerTask('dist', ['build', 'copy:dist', 'uglify', 'less', 'copy:fonts', 'zip']);
     grunt.registerTask('rangy', ['copy:rangy', 'bundle:rangy']);
     grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch:dev']);
     grunt.registerTask('release', ['clean', 'dist', 'gh-pages']);
