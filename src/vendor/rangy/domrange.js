@@ -1,5 +1,6 @@
-rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
-    var log = log4javascript.getLogger("rangy.DomRange");
+var rangy = require('./core');
+
+rangy.api.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
     var dom = api.dom;
     var util = api.util;
     var DomPosition = dom.DomPosition;
@@ -72,7 +73,6 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
         var partiallySelected;
         for (var node, frag = getRangeDocument(iterator.range).createDocumentFragment(), subIterator; node = iterator.next(); ) {
             partiallySelected = iterator.isPartiallySelectedSubtree();
-            log.debug("cloneSubtree got node " + dom.inspectNode(node) + " from iterator. partiallySelected: " + partiallySelected);
             node = node.cloneNode(!partiallySelected);
             if (partiallySelected) {
                 subIterator = iterator.getSubtreeIterator();
@@ -92,7 +92,6 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
         var it, n;
         iteratorState = iteratorState || { stop: false };
         for (var node, subRangeIterator; node = rangeIterator.next(); ) {
-            //log.debug("iterateSubtree, partially selected: " + rangeIterator.isPartiallySelectedSubtree(), nodeToString(node));
             if (rangeIterator.isPartiallySelectedSubtree()) {
                 if (func(node) === false) {
                     iteratorState.stop = true;
@@ -135,9 +134,7 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
     }
 
     function extractSubtree(iterator) {
-        log.debug("extract on iterator", iterator);
         for (var node, frag = getRangeDocument(iterator.range).createDocumentFragment(), subIterator; node = iterator.next(); ) {
-            log.debug("extractSubtree got node " + dom.inspectNode(node) + " from iterator. partiallySelected: " + iterator.isPartiallySelectedSubtree());
 
             if (iterator.isPartiallySelectedSubtree()) {
                 node = node.cloneNode(false);
@@ -201,8 +198,6 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
         this.range = range;
         this.clonePartiallySelectedTextNodes = clonePartiallySelectedTextNodes;
 
-        log.info("New RangeIterator ", dom.inspectNode(range.startContainer), range.startOffset, dom.inspectNode(range.endContainer), range.endOffset);
-
         if (!range.collapsed) {
             this.sc = range.startContainer;
             this.so = range.startOffset;
@@ -219,7 +214,6 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
                 this._last = (this.ec === root && !isCharacterDataNode(this.ec)) ?
                     this.ec.childNodes[this.eo - 1] : getClosestAncestorIn(this.ec, root, true);
             }
-            log.info("RangeIterator first and last", dom.inspectNode(this._first), dom.inspectNode(this._last));
         }
     }
 
@@ -248,11 +242,9 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
                 // Check for partially selected text nodes
                 if (isCharacterDataNode(current) && this.clonePartiallySelectedTextNodes) {
                     if (current === this.ec) {
-                        //log.info("*** CLONING END");
                         (current = current.cloneNode(true)).deleteData(this.eo, current.length - this.eo);
                     }
                     if (this._current === this.sc) {
-                        //log.info("*** CLONING START");
                         (current = current.cloneNode(true)).deleteData(0, this.so);
                     }
                 }
@@ -274,7 +266,6 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
                 if (current.parentNode) {
                     current.parentNode.removeChild(current);
                 } else {
-                    log.warn("Node to be removed has no parent node. Is this the child of an attribute node in Firefox 2?");
                 }
             }
         },
@@ -516,18 +507,14 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
 
     function splitRangeBoundaries(range, positionsToPreserve) {
         assertRangeValid(range);
-
-        log.debug("splitBoundaries called " + range.inspect(), positionsToPreserve);
         var sc = range.startContainer, so = range.startOffset, ec = range.endContainer, eo = range.endOffset;
         var startEndSame = (sc === ec);
 
         if (isCharacterDataNode(ec) && eo > 0 && eo < ec.length) {
             splitDataNode(ec, eo, positionsToPreserve);
-            log.debug("Split end", dom.inspectNode(ec), eo);
         }
 
         if (isCharacterDataNode(sc) && so > 0 && so < sc.length) {
-            log.debug("Splitting start", dom.inspectNode(sc), so);
             sc = splitDataNode(sc, so, positionsToPreserve);
             if (startEndSame) {
                 eo -= so;
@@ -536,10 +523,8 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
                 eo++;
             }
             so = 0;
-            log.debug("Split start", dom.inspectNode(sc), so);
         }
         range.setStartAndEnd(sc, so, ec, eo);
-        log.debug("splitBoundaries done");
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -660,7 +645,6 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
                 return (sc.nodeType == 3 || sc.nodeType == 4) ? sc.data.slice(this.startOffset, this.endOffset) : "";
             } else {
                 var textParts = [], iterator = new RangeIterator(this, true);
-                log.info("toString iterator: " + dom.inspectNode(iterator._first) + ", " + dom.inspectNode(iterator._last));
                 iterateSubtree(iterator, function(node) {
                     // Accept only text or CDATA nodes, not comments
                     if (node.nodeType == 3 || node.nodeType == 4) {
@@ -762,7 +746,6 @@ rangy.createCoreModule("DomRange", ["DomUtil"], function(api, module) {
                     endComparison = comparePoints(this.endContainer, this.endOffset, range.endContainer, range.endOffset);
 
                 var intersectionRange = this.cloneRange();
-                log.info("intersection", this.inspect(), range.inspect(), startComparison, endComparison);
                 if (startComparison == -1) {
                     intersectionRange.setStart(range.startContainer, range.startOffset);
                 }

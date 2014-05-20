@@ -1,5 +1,7 @@
-/* global rangy:true */
-rangy.createCoreModule('RangyExtensions', [], function(api) {
+/* global require:true */
+var rangy = require('../vendor/rangy/core');
+
+rangy.api.createCoreModule('RangyExtensions', [], function(api) {
     api.rangePrototype.getTopNodes = function() {
         var nodes = this.getNodes(null);
 

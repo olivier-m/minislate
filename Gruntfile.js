@@ -1,17 +1,15 @@
-/*global module:true, require:true */
+/*global module:true */
 
 module.exports = function(grunt) {
     'use strict';
 
-    var utils = require('./build/utils');
     var pkg = grunt.file.readJSON('package.json');
 
     grunt.initConfig({
         pkg: pkg,
 
         clean: {
-            dist: ['dist/'],
-            tmp: ['.grunt/tmp']
+            dist: ['dist/']
         },
 
         connect: {
@@ -45,54 +43,57 @@ module.exports = function(grunt) {
                     }
                 ]
             },
-            rangy: {
-                src: 'src/vendor/rangy/core/*.js',
-                dest: '.grunt/tmp/rangy/',
-                flatten: true,
-                expand: true,
+            dist: {
+                src: 'dist/js/<%= pkg.name.toLowerCase() %>.js',
+                dest: 'dist/js/<%= pkg.name.toLowerCase() %>.js',
                 options: {
-                    process: function(content, srcpath) {
-                        return utils.removeLogCalls(grunt, content, srcpath)
-                            .replace(/\s+$/gm, '');
+                    process: function(content) {
+                        return content.replace('{{version}}', pkg.version);
                     }
                 }
             }
         },
 
-        bundle: {
-            rangy: {
-                template: 'build/templates/rangy.js',
-                out: '.grunt/tmp/rangy-core.js'
-            },
+        browserify: {
             editor: {
-                template: 'build/templates/editor.js',
-                out: '.grunt/tmp/<%= pkg.name.toLowerCase() %>.js',
-                context: {
-                    name: pkg.name,
-                    author: pkg.author.name,
-                    version: pkg.version,
-                    license: pkg.license,
-                    year: (new Date()).getFullYear(),
-                    date: (new Date()).toUTCString()
+                src: 'src/main.js',
+                dest: 'dist/js/<%= pkg.name.toLowerCase() %>.js',
+                options: {
+                    bundleOptions: {
+                        standalone: 'Minislate'
+                    }
                 }
             }
         },
 
         uglify: {
             dist: {
-                src: '.grunt/tmp/<%= pkg.name.toLowerCase() %>.js',
+                src: 'dist/js/<%= pkg.name.toLowerCase() %>.js',
                 dest: 'dist/js/<%= pkg.name.toLowerCase() %>.js',
                 options: {
                     mangle: false,
                     compress: false,
                     beautify: true,
-                    preserveComments: 'some'
+                    preserveComments: 'some',
+                    banner: '/*!\n' +
+                            ' * <%= pkg.name %>\n' +
+                            ' * Version: <%= pkg.version %>\n' +
+                            ' *\n' +
+                            ' * Includes Rangy\n' +
+                            ' * https://code.google.com/p/rangy/\n' +
+                            ' *\n' +
+                            ' * Copyright <%= grunt.template.today("yyyy") %>, <%= pkg.author.name %> and contributors\n' +
+                            ' * Released under the <%= pkg.license %> license\n' +
+                            ' *\n' +
+                            ' * Date: <%= grunt.template.today("isoUtcDateTime") %>\n' +
+                            ' */\n'
                 }
             },
             distmin: {
-                src: '.grunt/tmp/<%= pkg.name.toLowerCase() %>.js',
+                src: 'dist/js/<%= pkg.name.toLowerCase() %>.js',
                 dest: 'dist/js/<%= pkg.name.toLowerCase() %>.min.js',
                 options: {
+                    sourceMap: true,
                     banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - '+
                     '<%= grunt.template.today("isoUtcDateTime") %> - <%= pkg.author.name %> and contributors. */\n'
                 }
@@ -131,8 +132,8 @@ module.exports = function(grunt) {
 
         watch: {
             dev: {
-                files: ['src/**', 'build/templates/*'],
-                tasks: ['build', 'uglify:dist', 'concat:css', 'copy:css', 'clean:tmp']
+                files: ['package.json', 'src/**'],
+                tasks: ['build', 'copy:dist', 'uglify:dist', 'concat:css', 'copy:css']
             }
         },
 
@@ -147,7 +148,7 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadTasks('build/tasks');
+    grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-connect');
@@ -158,8 +159,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-gh-pages');
     grunt.loadNpmTasks('grunt-zip');
 
-    grunt.registerTask('build', ['rangy', 'bundle:editor']);
-    grunt.registerTask('dist', ['build', 'uglify', 'concat:css', 'copy:css', 'cssmin', 'zip', 'clean:tmp']);
+    grunt.registerTask('build', ['browserify']);
+    grunt.registerTask('dist', ['build', 'copy:dist', 'uglify', 'concat:css', 'copy:css', 'cssmin', 'zip']);
     grunt.registerTask('rangy', ['copy:rangy', 'bundle:rangy']);
     grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch:dev']);
     grunt.registerTask('release', ['clean', 'dist', 'gh-pages']);

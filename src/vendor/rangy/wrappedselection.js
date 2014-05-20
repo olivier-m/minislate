@@ -1,6 +1,8 @@
 // This module creates a selection object wrapper that conforms as closely as possible to the Selection specification
 // in the HTML Editing spec (http://dvcs.w3.org/hg/editing/raw-file/tip/editing.html#selections)
-rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], function(api, module) {
+var rangy = require('./core');
+
+rangy.api.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], function(api, module) {
     api.config.checkSelectionRanges = true;
 
     var BOOLEAN = "boolean";
@@ -20,7 +22,6 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
     var getBody = dom.getBody;
     var rangesEqual = DomRange.rangesEqual;
 
-    var log = log4javascript.getLogger("rangy.WrappedSelection");
 
     // Utility function to support direction parameters in the API that may be a string ("backward" or "forward") or a
     // Boolean (true for backwards).
@@ -48,7 +49,7 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
     function getDocSelection(winParam) {
         return getWindow(winParam, "getDocSelection").document.selection;
     }
-    
+
     function winSelectionIsBackward(sel) {
         var backward = false;
         if (sel.anchorNode) {
@@ -99,7 +100,7 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
     // Test for existence of native selection extend() method
     var selectionHasExtend = isHostMethod(testSelection, "extend");
     features.selectionHasExtend = selectionHasExtend;
-    
+
     // Test if rangeCount exists
     var selectionHasRangeCount = (typeof testSelection.rangeCount == NUMBER);
     features.selectionHasRangeCount = selectionHasRangeCount;
@@ -133,11 +134,11 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
                 var originalSelectionRangeCount = sel.rangeCount;
                 var selectionHasMultipleRanges = (originalSelectionRangeCount > 1);
                 var originalSelectionRanges = [];
-                var originalSelectionBackward = winSelectionIsBackward(sel); 
+                var originalSelectionBackward = winSelectionIsBackward(sel);
                 for (var i = 0; i < originalSelectionRangeCount; ++i) {
                     originalSelectionRanges[i] = sel.getRangeAt(i);
                 }
-                
+
                 // Create some test elements
                 var body = getBody(document);
                 var testEl = body.appendChild( document.createElement("div") );
@@ -606,7 +607,6 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
                 range = getBody(sel.win.document).createTextRange();
                 range.collapse(true);
             }
-            log.warn("selection refresh called, selection type: " + sel.docSelection.type);
 
             if (sel.docSelection.type == CONTROL) {
                 updateControlSelection(sel);
@@ -660,21 +660,18 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
             // Check the range count first
             var i = oldRanges.length;
             if (i != this._ranges.length) {
-                log.debug("Selection.refresh: Range count has changed: was " + i + ", is now " + this._ranges.length);
                 return true;
             }
 
             // Now check the direction. Checking the anchor position is the same is enough since we're checking all the
             // ranges after this
             if (this.anchorNode != oldAnchorNode || this.anchorOffset != oldAnchorOffset) {
-                log.debug("Selection.refresh: anchor different, so selection has changed");
                 return true;
             }
 
             // Finally, compare each range in turn
             while (i--) {
                 if (!rangesEqual(oldRanges[i], this._ranges[i])) {
-                    log.debug("Selection.refresh: Range at index " + i + " has changed: was " + oldRanges[i].inspect() + ", is now " + this._ranges[i].inspect());
                     return true;
                 }
             }
@@ -750,7 +747,6 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
     // This is conformant to the old HTML5 selections draft spec but differs from WebKit and Mozilla's implementation.
     // The current spec does not yet define this method.
     selProto.toString = function() {
-        log.debug("selection toString called");
         var rangeTexts = [];
         for (var i = 0, len = this.rangeCount; i < len; ++i) {
             rangeTexts[i] = "" + this._ranges[i];
@@ -854,7 +850,7 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
         } );
         return results;
     };
-    
+
     function createStartOrEndSetter(isStart) {
         return function(node, offset) {
             var range;
@@ -871,7 +867,7 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
 
     selProto.setStart = createStartOrEndSetter(true);
     selProto.setEnd = createStartOrEndSetter(false);
-    
+
     // Add select() method to Range prototype. Any existing selection will be removed.
     api.rangePrototype.select = function(direction) {
         getSelection( this.getDocument() ).setSingleRange(this, direction);

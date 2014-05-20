@@ -1,4 +1,6 @@
-rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
+var rangy = require('./core');
+
+rangy.api.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
     var WrappedRange, WrappedTextRange;
     var dom = api.dom;
     var util = api.util;
@@ -8,7 +10,6 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
     var getContentDocument = dom.getContentDocument;
     var isCharacterDataNode = dom.isCharacterDataNode;
 
-    var log = log4javascript.getLogger("rangy.WrappedRange");
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
@@ -135,7 +136,6 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
                 };
 
             } catch(ex) {
-                log.info("Browser has bug (present in Firefox 2 and below) that prevents moving the start of a Range to a point after its current end. Correcting for it.");
 
                 rangeProto.setStart = function(node, offset) {
                     try {
@@ -199,7 +199,6 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
             if (range.compareBoundaryPoints(range.START_TO_END, range2) == -1 &&
                     range.compareBoundaryPoints(range.END_TO_START, range2) == 1) {
                 // This is the wrong way round, so correct for it
-                log.info("START_TO_END and END_TO_START wrong way round. Correcting in wrapper.");
 
                 rangeProto.compareBoundaryPoints = function(type, range) {
                     range = range.nativeRange || range;
@@ -244,7 +243,6 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
                     return frag;
                 };
             } else {
-                log.info("Incorrect native Range deleteContents() implementation. Using Rangy's own.")
             }
 
             body.removeChild(el);
@@ -296,7 +294,6 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
         */
         var getTextRangeContainerElement = function(textRange) {
             var parentEl = textRange.parentElement();
-            log.info("getTextRangeContainerElement parentEl is " + dom.inspectNode(parentEl));
             var range = textRange.duplicate();
             range.collapse(true);
             var startEl = range.parentElement();
@@ -325,10 +322,7 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
             // check for that
             if (!dom.isOrIsAncestorOf(wholeRangeContainerElement, containerElement)) {
                 containerElement = wholeRangeContainerElement;
-                log.warn("Collapse has moved TextRange outside its original container, so correcting", dom.inspectNode(containerElement));
             }
-
-            log.debug("getTextRangeBoundaryPosition start " + isStart + ", containerElement is " + dom.inspectNode(containerElement));
 
             // Deal with nodes that cannot "contain rich HTML markup". In practice, this means form inputs, images and
             // similar. See http://msdn.microsoft.com/en-us/library/aa703950%28VS.85%29.aspx
@@ -362,7 +356,6 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
             var nodeIndex = end;
 
             while (true) {
-                log.debug("nodeIndex is " + nodeIndex + ", start: " + start + ", end: " + end);
                 if (nodeIndex == childNodeCount) {
                     containerElement.appendChild(workingNode);
                 } else {
@@ -386,8 +379,6 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
                 containerElement.removeChild(workingNode);
             }
 
-            log.debug("*** GOT node index " + nodeIndex);
-
             // We've now reached or gone past the boundary of the text range we're interested in
             // so have identified the node we want
             boundaryNode = workingNode.nextSibling;
@@ -397,7 +388,6 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
                 // node containing the text range's boundary, so we move the end of the working range to the boundary point
                 // and measure the length of its text to get the boundary's offset within the node.
                 workingRange.setEndPoint(isStart ? "EndToStart" : "EndToEnd", textRange);
-                //log.info("boundaryNode text: '" + boundaryNode.data + "', textRange text: '" + textRange.text + "'");
 
                 var offset;
 
@@ -445,15 +435,11 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
                 }
                 boundaryPosition = new DomPosition(boundaryNode, offset);
             } else {
-                log.debug("Range boundary is at node boundary");
 
                 // If the boundary immediately follows a character data node and this is the end boundary, we should favour
                 // a position within that, and likewise for a start boundary preceding a character data node
                 previousNode = (isCollapsed || !isStart) && workingNode.previousSibling;
                 nextNode = (isCollapsed || isStart) && workingNode.nextSibling;
-                log.info("workingNode: " + dom.inspectNode(workingNode));
-                log.info("previousNode: " + dom.inspectNode(previousNode));
-                log.info("nextNode: " + dom.inspectNode(nextNode));
                 if (nextNode && isCharacterDataNode(nextNode)) {
                     boundaryPosition = new DomPosition(nextNode, 0);
                 } else if (previousNode && isCharacterDataNode(previousNode)) {
@@ -544,7 +530,6 @@ rangy.createCoreModule("WrappedRange", ["DomRange"], function(api, module) {
                 end = start = getTextRangeBoundaryPosition(this.textRange, rangeContainerElement, true,
                     true).boundaryPosition;
             } else {
-                log.debug("Refreshing Range from TextRange. parent element: " + dom.inspectNode(rangeContainerElement) + ", parentElement(): " + dom.inspectNode(this.textRange.parentElement()));
                 startBoundary = getTextRangeBoundaryPosition(this.textRange, rangeContainerElement, true, false);
                 start = startBoundary.boundaryPosition;
 

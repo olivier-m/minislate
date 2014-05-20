@@ -1,4 +1,7 @@
-/* global Editor:true */
+/* global require */
+
+var Editor = require('./editor').editor;
+var rangy = require('../vendor/rangy/core').api;
 
 Editor.getInlineButtonSpec = function(command, tagList, options) {
     options.isHighlighted = function() {
@@ -238,7 +241,7 @@ Editor.addDefaultButton('link', {
             editor.setRange(node);
         }
 
-        var selection = editor.rangy.saveSelection();
+        var selection = rangy.saveSelection();
 
         editor.showDialog(function() {
             input.focus();
@@ -282,10 +285,10 @@ Editor.addDefaultButton('link', {
 
         if (node) {
             if (!url) { //  Remove link
-                var selection = editor.rangy.saveSelection();
+                var selection = rangy.saveSelection();
                 info.range.replaceNodeByContents(node, true);
-                editor.rangy.restoreSelection(selection);
-                editor.rangy.removeMarkers(selection);
+                rangy.restoreSelection(selection);
+                rangy.removeMarkers(selection);
             } else {  // Update link
                 node.setAttribute('href', url);
                 editor.setRange(node);
@@ -335,7 +338,7 @@ Editor.addDefaultButton('image', {
 
         node = node.length === 0 ? null : node[0];
 
-        var selection = editor.rangy.saveSelection();
+        var selection = rangy.saveSelection();
 
         editor.showDialog(function() {
             input.focus();

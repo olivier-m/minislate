@@ -1,5 +1,6 @@
-rangy.createCoreModule("DomUtil", [], function(api, module) {
-    var log = log4javascript.getLogger("rangy.dom");
+var rangy = require('./core');
+
+rangy.api.createCoreModule("DomUtil", [], function(api, module) {
     var UNDEF = "undefined";
     var util = api.util;
 
@@ -150,7 +151,6 @@ rangy.createCoreModule("DomUtil", [], function(api, module) {
 
     // Note that we cannot use splitText() because it is bugridden in IE 9.
     function splitDataNode(node, index, positionsToPreserve) {
-        log.debug("splitDataNode called at index " + index + " in node " + inspectNode(node));
         var newNode = node.cloneNode(false);
         newNode.deleteData(0, index);
         node.deleteData(index, node.length - index);
@@ -260,15 +260,12 @@ rangy.createCoreModule("DomUtil", [], function(api, module) {
         // See http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html#Level-2-Range-Comparing
         var nodeC, root, childA, childB, n;
         if (nodeA == nodeB) {
-            log.debug("case 1");
             // Case 1: nodes are the same
             return offsetA === offsetB ? 0 : (offsetA < offsetB) ? -1 : 1;
         } else if ( (nodeC = getClosestAncestorIn(nodeB, nodeA, true)) ) {
-            log.debug("case 2", inspectNode(nodeC), getNodeIndex(nodeC));
             // Case 2: node C (container B or an ancestor) is a child node of A
             return offsetA <= getNodeIndex(nodeC) ? -1 : 1;
         } else if ( (nodeC = getClosestAncestorIn(nodeA, nodeB, true)) ) {
-            log.debug("case 3");
             // Case 3: node C (container A or an ancestor) is a child node of B
             return getNodeIndex(nodeC) < offsetB  ? -1 : 1;
         } else {
@@ -278,13 +275,11 @@ rangy.createCoreModule("DomUtil", [], function(api, module) {
             }
 
             // Case 4: containers are siblings or descendants of siblings
-            log.debug("case 4");
             childA = (nodeA === root) ? root : getClosestAncestorIn(nodeA, root, true);
             childB = (nodeB === root) ? root : getClosestAncestorIn(nodeB, root, true);
 
             if (childA === childB) {
                 // This shouldn't be possible
-                log.warn("comparePoints got to case 4 and childA and childB are the same!", nodeA, offsetA, nodeB, offsetB);
                 throw module.createError("comparePoints got to case 4 and childA and childB are the same!");
             } else {
                 n = root.firstChild;

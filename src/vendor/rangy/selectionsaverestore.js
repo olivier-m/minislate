@@ -12,7 +12,10 @@
  * Version: 1.3alpha.804
  * Build date: 8 December 2013
  */
-rangy.createModule("SaveRestore", ["WrappedRange"], function(api, module) {
+
+var rangy = require('./core');
+
+rangy.api.createModule("SaveRestore", ["WrappedRange"], function(api, module) {
     var dom = api.dom;
 
     var markerTextChar = "\ufeff";
