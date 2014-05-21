@@ -12,4 +12,4 @@ require('./lib/rangy-extensions');
 
 // Editor
 exports.editor = require('./lib/editor').editor;
-require('./lib/editor-buttons');
+require('./lib/buttons');
