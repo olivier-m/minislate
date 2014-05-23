@@ -338,6 +338,15 @@ var Editor = Class(Object, {
             result = getEditor(parent);
         }
         return result;
+    },
+
+    // Cleanup operations
+    cleanBlock: function(node) {
+        // remove <br> at the end of block
+        var e = node.childNodes[node.childNodes.length - 1];
+        if (e.nodeType === 1 && e.nodeName.toLowerCase() === 'br') {
+            node.removeChild(e);
+        }
     }
 });
 

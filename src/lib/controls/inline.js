@@ -322,6 +322,7 @@ exports.Image = Class(Button, {
             img.setAttribute('src', url);
             info.range.deleteContents();
             info.range.insertNode(img);
+            editor.cleanBlock(img.parentNode);
             editor.setRange(img);
         }
         editor.showToolbar();
