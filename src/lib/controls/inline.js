@@ -239,6 +239,7 @@ exports.Link = Class(Button, {
             editor.setRange(node);
         }
         editor.showToolbar();
+        return node;
     }
 });
 
@@ -318,14 +319,15 @@ exports.Image = Class(Button, {
             node.setAttribute('src', url);
             editor.setRange(node);
         } else if (url) {
-            var img = document.createElement('img');
-            img.setAttribute('src', url);
+            node = document.createElement('img');
+            node.setAttribute('src', url);
             info.range.deleteContents();
-            info.range.insertNode(img);
-            editor.cleanBlock(img.parentNode);
-            editor.setRange(img);
+            info.range.insertNode(node);
+            editor.cleanBlock(node.parentNode);
+            editor.setRange(node);
         }
         editor.showToolbar();
+        return node;
     }
 });
 
