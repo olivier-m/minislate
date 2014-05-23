@@ -109,8 +109,8 @@ var Editor = Class(Object, {
         var self = this;
 
         this.on('keyup', function() {
-            // Force paragraph on empty block
-            if (self.getSelection().getStart() === self._currentEditor) {
+            var sel = self.getSelection();
+            if (sel.getRangeAt(0).collapsed && sel.getStart() === self._currentEditor) {
                 self.exec('formatBlock', 'p');
             }
         });
