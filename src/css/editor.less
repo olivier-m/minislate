@@ -1,6 +1,6 @@
 @import "base";
 
-div.editor-toolbar {
+.@{editor-class-prefix}toolbar {
     position: absolute;
     top: 0;
     left: 0;
@@ -21,7 +21,7 @@ div.editor-toolbar {
     .transition(@tr);
 }
 
-div.editor-toolbar ul {
+.@{editor-class-prefix}controls {
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -29,7 +29,7 @@ div.editor-toolbar ul {
     width: 100%;
     .gradient(@start: @editor-bgcolor, @stop: lighten(@editor-bgcolor, -13.33%));
 }
-div.editor-toolbar li {
+.@{editor-class-prefix}controls li {
     display: block;
     float: left;
     margin: 0;
@@ -59,10 +59,10 @@ div.editor-toolbar li {
             .gradient(@start: lighten(@editor-bgcolor, 6.66%), @stop: lighten(@editor-bgcolor, -6.66%));
         }
 
-        &.editor-highlight, &:active {
+        &.@{editor-class-prefix}highlight, &:active {
             .gradient(@start: @editor-bgcolor, @stop: lighten(@editor-bgcolor, 13.33%));
         }
-        &.editor-highlight:hover {
+        &.@{editor-class-prefix}highlight:hover {
             .gradient(@start: lighten(@editor-bgcolor, 6.66%), @stop: lighten(@editor-bgcolor, 26.66%));
         }
 
@@ -74,7 +74,7 @@ div.editor-toolbar li {
         }
     }
 
-    &.editor-menu ul {
+    &.@{editor-class-prefix}menu ul {
         position: absolute;
         border-radius: 3px;
         width: auto;
@@ -99,13 +99,16 @@ div.editor-toolbar li {
             }
         }
     }
-    &.editor-menu i.fa-chevron-down {
+    &.@{editor-class-prefix}menu i.fa-chevron-down {
         font-size: 0.8em;
+        color: lighten(@editor-fgcolor, -50%);
+    }
+    &.@{editor-class-prefix}menu span.@{editor-class-prefix}menu-arrow {
         color: lighten(@editor-fgcolor, -50%);
     }
 }
 
-div.editor-dialog {
+.@{editor-class-prefix}dialog {
     padding: 6px;
     font-size: 12px;
 

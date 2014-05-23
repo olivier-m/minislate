@@ -1,28 +1,27 @@
+/* jshint newcap:false */
 /* global require, exports */
 var rangy = require('../vendor/rangy/core').api;
 var extend = require('./util').extend;
+var Class = require('./util').Class;
 var Toolbar = require('./toolbar').Toolbar;
-
 
 /*
  * Editor (main)
  */
-var Editor = function(elements, options) {
-    if (!window.getSelection) {
-        throw new Error('Browser features missing.');
-    }
-    return this.init(elements, options);
-};
-
-Editor.prototype = {
+var Editor = Class(Object, {
     defaults: {
         delay: 200,
         diffLeft: 2,
         diffTop: -10,
+        classPrefix: 'editor-',
         fontAwesomeEnabled: true
     },
 
     init: function(elements, options) {
+        if (!window.getSelection) {
+            throw new Error('Browser features missing.');
+        }
+
         this.elements = typeof elements === 'string' ? document.querySelectorAll(elements) : elements;
         if (this.elements.length === 0) {
             return;
@@ -118,36 +117,18 @@ Editor.prototype = {
     },
 
     initToolbar: function() {
-        this.toolbar = new Toolbar({
+        this.toolbar = new Toolbar(this, {
+            classPrefix: this.options.classPrefix,
             fontAwesomeEnabled: this.options.fontAwesomeEnabled
         });
-        this.toolbar.editor = this;
 
-        this.addDefaultItems();
-        return this;
-    },
-
-    addDefaultItems: function() {
-        var i, item;
-        for (i=0; i<Editor.defaultItems.length; i++) {
-            item = Editor.defaultItems[i];
-            if (item.type === 'menu') {
-                this.addMenu(item.id, item.options, false);
-            } else {
-                this.addButton(item.id, item.options, false);
-            }
-        }
-        this.toolbar.drawItems();
+        // Restore focus on editor element when showing toolbar
+        var self = this;
+        this.toolbar.element.addEventListener('toolbar.show', function() {
+            self._currentEditor.focus();
+        });
 
         return this;
-    },
-
-    addButton: function(id, options, redraw) {
-        this.toolbar.addButton(id, options, redraw);
-    },
-
-    addMenu: function(id, options, redraw) {
-        this.toolbar.addMenu(id, options, redraw);
     },
 
     exec: function(cmd, arg) {
@@ -358,17 +339,47 @@ Editor.prototype = {
         }
         return result;
     }
+});
+
+exports.Editor = Editor;
+
+
+var controls = {
+    Menu: require('./controls').Menu,
+    inline: require('./controls/inline'),
+    block: require('./controls/block')
 };
 
-Editor.defaultItems = [];
+exports.simpleEditor = Class(Editor, {
+    init: function() {
+        Editor.prototype.init.apply(this, arguments);
 
-Editor.addDefaultButton = function(id, options) {
-    Editor.defaultItems.push({id: id, options: options, type:'button'});
-};
-
-Editor.addDefaultMenu = function(id, options) {
-    Editor.defaultItems.push({id: id, options: options, type:'menu'});
-};
-
-
-exports.editor = Editor;
+        this.toolbar.addControl(controls.Menu, 'blocks', {
+            label: '¶',
+            title: 'Blocks',
+            controls: [
+                [controls.block.Block, 'p'],
+                [controls.block.H1, 'h1'],
+                [controls.block.H2, 'h2'],
+                [controls.block.H3, 'h3'],
+                [controls.block.Preformated, 'pre']
+            ]
+        });
+        this.toolbar.addControl(controls.Menu, 'lists', {
+            label: 'Lists',
+            title: 'Lists',
+            fontAwesomeID: 'list-ul',
+            controls: [
+                [controls.block.UnorderedList, 'ul'],
+                [controls.block.OrderedList, 'ol']
+            ]
+        });
+        this.toolbar.addControl(controls.inline.Bold, 'bold');
+        this.toolbar.addControl(controls.inline.Italic, 'italic');
+        this.toolbar.addControl(controls.inline.Underline, 'underline');
+        this.toolbar.addControl(controls.inline.StrikeThrough, 'strike');
+        this.toolbar.addControl(controls.inline.Link, 'link');
+        this.toolbar.addControl(controls.inline.Image, 'image');
+        this.toolbar.addControl(controls.inline.Oembed, 'oembed');
+    }
+});

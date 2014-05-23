@@ -11,5 +11,5 @@ require('./vendor/rangy/wrappedselection');
 require('./lib/rangy-extensions');
 
 // Editor
-exports.editor = require('./lib/editor').editor;
-require('./lib/buttons');
+exports.Editor = require('./lib/editor').Editor;
+exports.simpleEditor = require('./lib/editor').simpleEditor;
