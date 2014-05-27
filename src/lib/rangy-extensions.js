@@ -2,102 +2,126 @@
 var rangy = require('../vendor/rangy/core');
 
 rangy.api.createCoreModule('RangyExtensions', [], function(api) {
-    api.rangePrototype.getTopNodes = function() {
-        var nodes = this.getNodes(null);
-
-        if (nodes.length === 0) {
-            return nodes;
+    //
+    // Selection extensions
+    //
+    api.selectionPrototype.getBoundaryNodes = function() {
+        var startNode, startOffset, endNode, endOffset;
+        if (!this.isBackwards()) {
+            startNode = this.anchorNode;
+            startOffset = this.anchorOffset;
+            endNode = this.focusNode;
+            endOffset = this.focusOffset;
+        } else {
+            startNode = this.focusNode;
+            startOffset = this.focusOffset;
+            endNode = this.anchorNode;
+            endOffset = this.anchorOffset;
         }
 
-        var node,
-            prev = null,
+        // Push & pull boundaries
+        if (startNode.nodeType === 3 && startNode.nextSibling && startNode.length === startOffset) {
+            startNode = startNode.nextSibling;
+        } else if (startNode.nodeType === 1 && startNode.childNodes.length > startOffset) {
+            startNode = startNode.childNodes[startOffset];
+        }
+        while (startNode.firstChild && startNode.firstChild.nodeType === 1) {
+            startNode = startNode.firstChild;
+        }
+
+        if (endNode.nodeType === 3 && endNode.previousSibling && endOffset === 0) {
+            endNode = endNode.previousSibling;
+        } else if (endOffset > 0 && endNode.nodeType === 1 && endNode.childNodes.length > 0) {
+            endNode = endNode.childNodes[endOffset - 1];
+        }
+        while (endNode.lastChild && endNode.lastChild.nodeType === 1) {
+            endNode = endNode.lastChild;
+        }
+
+
+        // Pull boundaries outside text nodes
+        startNode = startNode && startNode.nodeType !== 1 ? startNode.parentNode : startNode;
+        endNode = endNode && endNode.nodeType !== 1 ? endNode.parentNode : endNode;
+
+        return {
+            start: startNode,
+            end: endNode
+        };
+    };
+    api.selectionPrototype.getEnclosingNode = function() {
+        // Returns the deepest node containing the whole selection.
+        //
+        var nodes = this.getBoundaryNodes(),
+            node;
+
+        if (nodes.start === nodes.end) {
+            node = nodes.start;
+        } else {
+            node = api.dom.getCommonAncestor(nodes.start, nodes.end);
+        }
+
+        // Get the deeper node fully contained in resulting node
+        return api.dom.getDeepestNode(node);
+    };
+    api.selectionPrototype.getTopNodes = function(boundary, filter) {
+        boundary = boundary || document.body;
+        var node = this.getEnclosingNode(),
+            result = [node];
+
+        if (node === boundary) {
+            return [];
+        }
+
+        while (node.parentNode !== boundary) {
+            node = node.parentNode;
+            result.push(node);
+        }
+
+        if (typeof(filter) !== 'function') {
+            return result;
+        }
+
+        var _result = result;
+        result = [];
+        for (var i=0; i<_result.length; i++) {
+            if (filter(_result[i])) {
+                result.push(_result[i]);
+            }
+        }
+        return result;
+    };
+    api.selectionPrototype.getSurroundingNodes = function() {
+        var nodes = this.getBoundaryNodes(),
+            parent = this.getEnclosingNode(),
+            started = false,
+            node,
             result = [];
 
-        for (var i=0; i<nodes.length; i++) {
-            node = nodes[i];
-            if (node.textContent !== this.toString()) {
-                continue;
-            }
+        if (api.dom.isAncestorOf(nodes.start, nodes.end, true)) {
+            return [nodes.start];
+        }
+        if (api.dom.isAncestorOf(nodes.end, nodes.start, true)) {
+            return [nodes.end];
+        }
 
-            if (result.indexOf(node.parentNode) === -1 && node.parentNode !== prev) {
+        for (var i=0; i<parent.childNodes.length; i++) {
+            node = parent.childNodes[i];
+            if (!started) {
+                started = api.dom.isAncestorOf(node, nodes.start, true);
+            }
+            if (started) {
                 result.push(node);
             }
-            prev = node;
+            if (api.dom.isAncestorOf(node, nodes.end, true)) {
+                break;
+            }
         }
         return result;
     };
 
-    api.rangePrototype.getSurroundingNode = function() {
-        var nodes = this.getTopNodes(),
-            text = this.toString(),
-            node = null;
-
-        var invalidNodes =
-            (nodes.length !== 1) ||
-            (nodes[0].nodeType === 3 && this.toString() !== nodes[0].textContent);
-
-        if (invalidNodes) {
-            // last chance with selection ancestor
-            var _node = this.commonAncestorContainer;
-            if (_node && _node.textContent === text) {
-                node = _node;
-            }
-        } else {
-            node = nodes[0];
-        }
-
-        if (node === null) {
-            return node;
-        }
-
-        while (text === node.parentNode.textContent) {
-            node = node.parentNode;
-        }
-
-        return node;
-    };
-
-    api.rangePrototype.getContainer = function() {
-        var node = this.getSurroundingNode();
-        if (node && node !== this.commonAncestorContainer && node.parentNode.nodeType === 1) {
-            return node.parentNode;
-        }
-
-        if (node === this.commonAncestorContainer) {
-            node = node.parentNode;
-        } else {
-            node = this.commonAncestorContainer;
-        }
-
-        while (node.nodeType !== 1) {
-            node = node.parentNode;
-        }
-        return node;
-    };
-
-    api.rangePrototype.replaceNodeByContents = function(node) {
-        var content = this.getDocument().createDocumentFragment();
-
-        for (var i=0; i<node.childNodes.length; i++) {
-            content.appendChild(node.childNodes[i].cloneNode(true));
-        }
-
-        node.parentNode.replaceChild(content, node);
-    };
-
-    api.selectionPrototype.getStart = function() {
-        var node = this.anchorNode;
-        return node && node.nodeType === 3 ? node.parentNode : node;
-    };
-
-    api.dom.getTopContainer = function(node) {
-        // Returns top fully enclosing container for a node
-        while (node.parentNode.childNodes.length === 1) {
-            node = node.parentNode;
-        }
-        return node;
-    };
-
+    //
+    // DOM extensions
+    //
     api.dom.hasParents = function(node, parents) {
         while ([document, document.body].indexOf(node) === -1) {
             if (parents.indexOf(node) !== -1) {
@@ -106,5 +130,22 @@ rangy.api.createCoreModule('RangyExtensions', [], function(api) {
             node = node.parentNode;
         }
         return false;
+    };
+
+    api.dom.getDeepestNode = function(node) {
+        while (node.childNodes.length === 1 && node.firstChild.nodeType === 1) {
+            node = node.firstChild;
+        }
+        return node;
+    };
+
+    api.dom.replaceNodeByContents = function(node) {
+        var content = this.getDocument().createDocumentFragment();
+
+        for (var i=0; i<node.childNodes.length; i++) {
+            content.appendChild(node.childNodes[i].cloneNode(true));
+        }
+
+        node.parentNode.replaceChild(content, node);
     };
 });

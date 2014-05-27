@@ -16,7 +16,7 @@ module.exports = function(grunt) {
             dev: {
                 options: {
                     port: 5000,
-                    base: ['demo', 'dist']
+                    base: ['demo', 'dist', 'tests']
                 }
             }
         },
