@@ -109,8 +109,8 @@ var Editor = Class(Object, {
         var self = this;
 
         this.on('keyup', function() {
-            var sel = self.getSelection();
-            if (sel.getRangeAt(0).collapsed && sel.getStart() === self._currentEditor) {
+            var selection = self.getSelection();
+            if (selection.isCollapsed && selection.getEnclosingNode() === self._currentEditor) {
                 self.exec('formatBlock', 'p');
             }
         });
@@ -170,19 +170,15 @@ var Editor = Class(Object, {
     },
 
     setToolbarPosition: function() {
-        var info = this.getRangeInfo(),
-            container = info.container,
-            surrounding = info.surrounding,
-            boundary = container.getBoundingClientRect(),
+        var selection = this.getSelection(),
+            range = this.getRange(),
+            node = selection.getEnclosingNode(),
+            boundary = node.getBoundingClientRect(),
             height = this.toolbar.element.offsetHeight,
             width = this.toolbar.element.offsetWidth;
 
-        if (surrounding && surrounding.nodeType === 1) {
-            boundary = surrounding.getBoundingClientRect();
-        }
-
-        if (!info.range.collapsed && info.range.nativeRange.getBoundingClientRect) {
-            boundary = info.range.nativeRange.getBoundingClientRect();
+        if (!selection.isCollapsed && rangy.util.isHostMethod(range.nativeRange, 'getBoundingClientRect')) {
+            boundary = range.nativeRange.getBoundingClientRect();
         }
 
         // Top position
@@ -222,6 +218,7 @@ var Editor = Class(Object, {
     _onSelect: function(evt) {
         var elements = [].slice.call(this.elements);
         elements.push(this.toolbar.element);
+
         if (!rangy.dom.hasParents(evt.target, elements)) {
             this.hideToolbar();
             this._currentEditor = false;
@@ -250,61 +247,39 @@ var Editor = Class(Object, {
         this.getSelection().setSingleRange(range);
     },
 
-    getRangeInfo: function() {
-        var range = this.getRange(),
-            surrounding = range.getSurroundingNode(),
-            container = range.getContainer(),
-            topSurrounding,
-            topContainer;
-
-        if (surrounding !== null) {
-            topSurrounding = rangy.dom.getTopContainer(surrounding);
+    getEnclosingNode: function() {
+        var selection = this.getSelection();
+        if (selection.rangeCount !== 1) {
+            return null;
         }
-        if (container !== null) {
-            topContainer = rangy.dom.getTopContainer(container);
+        var node = selection.getEnclosingNode();
+        if (node === this._currentEditor) {
+            return null;
         }
-
-        return {
-            range: range,
-            surrounding: surrounding,
-            container: container,
-            topSurrounding: topSurrounding || null,
-            topContainer: topContainer || null
-        };
+        return node;
     },
 
-    filterSelectionNodes: function(filter) {
-        var info = this.getRangeInfo(),
-            node,
-            res = [];
-
-        filter = filter || function(type, name, node) { return node; };
-
-        // Set starting point
-        if (info.surrounding && info.surrounding.nodeType === 1) {
-            node = info.surrounding;
-        } else {
-            node = info.container;
+    getTopNodes: function(filter) {
+        var selection = this.getSelection();
+        if (selection.rangeCount !== 1) {
+            return [];
         }
-
-        while (node && node.childNodes.length === 1 && node.firstChild.nodeType === 1) {
-            node = node.firstChild;
-        }
-
-        // Iterate parents from starting point
-        while (node && node !== this._currentEditor) {
-            if (filter(node.nodeType, node.nodeName.toLowerCase(), node)) {
-                res.push(node);
-            }
-            node = node.parentNode;
-        }
-        return res;
+        return selection.getTopNodes(this._currentEditor, filter);
     },
 
-    filterSelectionNodeName: function() {
-        var names = [].slice.apply(arguments);
-        return this.filterSelectionNodes(function(t, n) {
-            return t === 1 && names.indexOf(n) !== -1;
+    getSurroundingNodes: function() {
+        var selection = this.getSelection();
+        if (selection.rangeCount !== 1) {
+            return [];
+        }
+
+        return selection.getSurroundingNodes();
+    },
+
+    filterTopNodeNames: function() {
+        var names = [].slice.call(arguments);
+        return this.getTopNodes(function(n) {
+            return names.indexOf(n.nodeName.toLowerCase()) !== -1;
         });
     },
 
@@ -367,7 +342,7 @@ exports.simpleEditor = Class(Editor, {
             label: '¶',
             title: 'Blocks',
             controls: [
-                [controls.block.Block, 'p'],
+                [controls.block.Paragraph, 'p'],
                 [controls.block.H1, 'h1'],
                 [controls.block.H2, 'h2'],
                 [controls.block.H3, 'h3'],

@@ -11,16 +11,13 @@ var _util = require('../util'),
 
 // Base block (paragraph)
 var Block = Class(Button, {
-    tagList: ['p'],
-    tag: 'p',
+    tagList: [],
+    tag: null,
     command: 'formatblock',
-    defaults: extend({}, Button.prototype.defaults, {
-        label: '¶',
-        title: 'Paragraph'
-    }),
+    defaults: extend({}, Button.prototype.defaults),
 
     isHighlighted: function() {
-        return this.toolbar.editor.filterSelectionNodeName.apply(
+        return this.toolbar.editor.filterTopNodeNames.apply(
             this.toolbar.editor, this.tagList
         ).length > 0;
     },
@@ -36,6 +33,16 @@ var Block = Class(Button, {
 });
 exports.Block = Block;
 
+
+exports.Paragraph = Class(Block, {
+    tagList: ['p'],
+    tag: 'p',
+    command: 'formatblock',
+    defaults: extend({}, Block.prototype.defaults, {
+        label: '¶',
+        title: 'Paragraph'
+    })
+});
 
 // Titles (H1 -> H6)
 for (var i=1; i<=6; i++) {
@@ -68,7 +75,7 @@ exports.Preformated = Class(Block, {
         editor.on('keydown', function(evt) {
             // Activate tab in preformated blocks
             if (evt.which === 9 && !evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
-                if (editor.filterSelectionNodeName('pre').length > 0) {
+                if (editor.filterTopNodeNames('pre').length > 0) {
                     evt.preventDefault();
                     editor.exec('insertHtml', '    ');
                 }
@@ -87,7 +94,7 @@ var BaseList = Class(Block, {
 
         editor.on('keydown', function(evt) {
             if (evt.which === 9 && !evt.ctrlKey && !evt.metaKey) {
-                var node = editor.filterSelectionNodeName('li');
+                var node = editor.filterTopNodeNames('li');
                 if (node.length === 0) {
                     return;
                 }

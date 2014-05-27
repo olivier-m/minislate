@@ -16,20 +16,19 @@ var Inline = Class(Button, {
     command: null,
 
     isHighlighted: function() {
-        return this.toolbar.editor.filterSelectionNodeName.apply(
+        return this.toolbar.editor.filterTopNodeNames.apply(
             this.toolbar.editor, this.tagList
         ).length > 0;
     },
     isVisible: function() {
-        return !this.toolbar.editor.getRange().collapsed || this.isHighlighted();
+        return !this.toolbar.editor.getSelection().isCollapsed || this.isHighlighted();
     },
 
     click: function() {
-        var editor = this.toolbar.editor,
-            info = editor.getRangeInfo();
+        var editor = this.toolbar.editor;
 
-        if (info.range.collapsed) {
-            var node = editor.filterSelectionNodeName.apply(editor, this.tagList);
+        if (editor.getSelection().isCollapsed) {
+            var node = editor.filterTopNodeNames.apply(editor, this.tagList);
             if (node.length === 0) {
                 return;
             }
@@ -185,7 +184,7 @@ exports.Link = Class(Button, {
 
     isHighlighted: function() {
         var title = this.options.base_title;
-        var nodes = this.toolbar.editor.filterSelectionNodeName('a');
+        var nodes = this.toolbar.editor.filterTopNodeNames('a');
         if (nodes.length > 0) {
             title += ': ' + nodes[0].href;
         }
@@ -193,20 +192,20 @@ exports.Link = Class(Button, {
         return nodes.length > 0;
     },
     isVisible: function() {
-        return !this.toolbar.editor.getRange().collapsed || this.isHighlighted();
+        return !this.toolbar.editor.getSelection().isCollapsed || this.isHighlighted();
     },
 
     click: function() {
         var editor = this.toolbar.editor,
-            info = editor.getRangeInfo();
+            collapsed = editor.getSelection().isCollapsed;
 
-        var node = editor.filterSelectionNodeName('a');
-        if (info.range.collapsed && node.length === 0) {
+        var node = editor.filterTopNodeNames('a');
+        if (collapsed && node.length === 0) {
             return;
         }
 
         node = node.length === 0 ? null : node[0];
-        if (info.range.collapsed) {
+        if (collapsed) {
             editor.setRange(node);
         }
 
@@ -215,12 +214,12 @@ exports.Link = Class(Button, {
 
     saveLink: function(node, url) {
         var editor = this.toolbar.editor,
-            info = editor.getRangeInfo();
+            range = editor.getRange();
 
         if (node) {
             if (!url) { //  Remove link
                 var selection = rangy.saveSelection();
-                info.range.replaceNodeByContents(node, true);
+                rangy.dom.replaceNodeByContents(node, true);
                 rangy.restoreSelection(selection);
                 rangy.removeMarkers(selection);
             } else {  // Update link
@@ -230,12 +229,12 @@ exports.Link = Class(Button, {
         } else if (url) { //  New link
             node = document.createElement('a');
             node.setAttribute('href', url);
-            var contents = info.range.cloneContents();
+            var contents = range.cloneContents();
             for (var i=0; i<contents.childNodes.length; i++) {
                 node.appendChild(contents.childNodes[i].cloneNode(true));
             }
-            info.range.deleteContents();
-            info.range.insertNode(node);
+            range.deleteContents();
+            range.insertNode(node);
             editor.setRange(node);
         }
         editor.showToolbar();
@@ -300,12 +299,12 @@ exports.Image = Class(Button, {
     },
 
     isHighlighted: function() {
-        return this.toolbar.editor.filterSelectionNodeName('img').length > 0;
+        return this.toolbar.editor.filterTopNodeNames('img').length > 0;
     },
 
     click: function() {
         var editor = this.toolbar.editor,
-            node = editor.filterSelectionNodeName('img');
+            node = editor.filterTopNodeNames('img');
 
         node = node.length === 0 ? null : node[0];
         (new ImageDialog(this)).show(node);
@@ -313,7 +312,7 @@ exports.Image = Class(Button, {
 
     saveImage: function(node, url) {
         var editor = this.toolbar.editor,
-            info = editor.getRangeInfo();
+            range = editor.getRange();
 
         if (node && url) {
             node.setAttribute('src', url);
@@ -321,8 +320,8 @@ exports.Image = Class(Button, {
         } else if (url) {
             node = document.createElement('img');
             node.setAttribute('src', url);
-            info.range.deleteContents();
-            info.range.insertNode(node);
+            range.deleteContents();
+            range.insertNode(node);
             editor.cleanBlock(node.parentNode);
             editor.setRange(node);
         }
