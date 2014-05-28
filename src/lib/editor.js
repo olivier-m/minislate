@@ -243,17 +243,21 @@ var Editor = Class(Object, {
         return this.getSelection().getRangeAt(0);
     },
 
-    setRange: function() {
-        var nodes = [].slice.call(arguments);
-        if (nodes.length === 0) {
+    setRange: function(node, end) {
+        if (typeof(node) === 'undefined') {
             return;
         }
+
         var range = rangy.createRange();
-        range.setStartBefore(nodes[0]);
-        for (var i=0; i<nodes.length; i++) {
-            range.setEndAfter(nodes[i]);
+        range.selectNodeContents(node);
+
+        if (end && end !== node) {
+            if (end.lastChild) {
+                range.setEndAfter(end.lastChild);
+            } else {
+                range.setEndAfter(end);
+            }
         }
-        //range.selectNode(node);
         this.getSelection().setSingleRange(range);
     },
 

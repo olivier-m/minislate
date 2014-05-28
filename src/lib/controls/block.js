@@ -209,7 +209,7 @@ exports.Blockquote = Class(Block, {
         }
 
         // Expand selection to top nodes
-        editor.setRange.apply(editor, nodeList);
+        editor.setRange(nodeList[0], nodeList[nodeList.length - 1]);
         nodeList = editor.getSurroundingNodes();
 
         // Push nodes to blockquote

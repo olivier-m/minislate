@@ -7,6 +7,7 @@ var _util = require('../util'),
 
     Class = _util.Class,
     extend = _util.extend,
+    _ = _util._,
     Button = _controls.Button,
     Dialog = _controls.Dialog;
 
@@ -230,9 +231,10 @@ exports.Link = Class(Button, {
             node = document.createElement('a');
             node.setAttribute('href', url);
             var contents = range.cloneContents();
-            for (var i=0; i<contents.childNodes.length; i++) {
-                node.appendChild(contents.childNodes[i].cloneNode(true));
-            }
+            _.each(contents.childNodes, function(n) {
+                node.appendChild(n.cloneNode(true));
+            });
+
             range.deleteContents();
             range.insertNode(node);
             editor.setRange(node);
