@@ -10,7 +10,7 @@ var Toolbar = require('./toolbar').Toolbar;
  */
 var Editor = Class(Object, {
     defaults: {
-        delay: 200,
+        delay: 300,
         diffLeft: 2,
         diffTop: -10,
         classPrefix: 'editor-',
@@ -241,9 +241,17 @@ var Editor = Class(Object, {
         return this.getSelection().getRangeAt(0);
     },
 
-    setRange: function(node) {
+    setRange: function() {
+        var nodes = [].slice.call(arguments);
+        if (nodes.length === 0) {
+            return;
+        }
         var range = rangy.createRange();
-        range.selectNode(node);
+        range.setStartBefore(nodes[0]);
+        for (var i=0; i<nodes.length; i++) {
+            range.setEndAfter(nodes[i]);
+        }
+        //range.selectNode(node);
         this.getSelection().setSingleRange(range);
     },
 
@@ -358,6 +366,7 @@ exports.simpleEditor = Class(Editor, {
                 [controls.block.OrderedList, 'ol']
             ]
         });
+        this.toolbar.addControl(controls.block.Blockquote, 'quote');
         this.toolbar.addControl(controls.inline.Bold, 'bold');
         this.toolbar.addControl(controls.inline.Italic, 'italic');
         this.toolbar.addControl(controls.inline.Underline, 'underline');

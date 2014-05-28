@@ -3,6 +3,7 @@
 
 var _util = require('../util'),
     _controls = require('../controls'),
+    rangy = require('../../vendor/rangy/core').api,
 
     Class = _util.Class,
     extend = _util.extend,
@@ -130,4 +131,87 @@ exports.OrderedList = Class(BaseList, {
         title: 'Ordered list',
         fontAwesomeID: 'list-ol'
     })
+});
+
+
+// Blockquotes
+exports.Blockquote = Class(Block, {
+    tagList: ['blockquote'],
+    defaults: extend({}, Block.prototype.defaults, {
+        label: 'Quote',
+        title: 'Quote',
+        fontAwesomeID: 'quote-right'
+    }),
+
+    init: function() {
+        Block.prototype.init.apply(this, arguments);
+
+        // Leave blockquote after an empty paragraph
+        var editor = this.toolbar.editor;
+        editor.on('keyup', function(evt) {
+            if (evt.which === 13 && !evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
+                var node = editor.filterTopNodeNames('blockquote');
+                if (node.length === 0 || !editor.getSelection().isCollapsed) {
+                    return;
+                }
+
+                var parent = node[0];
+                node = editor.filterTopNodeNames('p');
+                if (node.length === 0) {
+                    return;
+                }
+
+                node = node[0];
+                if(node.previousSibling && node.previousSibling.textContent === '') {
+                    node.previousSibling.parentNode.removeChild(node.previousSibling);
+                    parent.parentNode.insertBefore(node, parent.nextSibling);
+                    editor.setRange(node.firstChild);
+                    editor.getRange().collapse();
+                    editor.showToolbar();
+                }
+            }
+        });
+    },
+
+    click: function() {
+        var editor = this.toolbar.editor,
+            selection = editor.getSelection(),
+            nodeList = editor.getTopNodes(),
+            quoteNodes = editor.filterTopNodeNames('blockquote');
+
+        if (selection.isCollapsed && nodeList.length === 0) {
+            return;
+        }
+
+        if (quoteNodes.length > 0) {
+            // Remove blockquote
+            selection = rangy.saveSelection();
+            rangy.dom.replaceNodeByContents(quoteNodes[0]);
+            rangy.restoreSelection(selection);
+            rangy.removeMarkers(selection);
+        } else {
+            // Insert blockquote
+            // TODO: improve this
+            var node = nodeList[nodeList.length - 1];
+            if (node) {
+                nodeList = [node];
+            } else {
+                nodeList = selection.getSurroundingNodes();
+            }
+
+            // Expand selection to top nodes
+            editor.setRange.apply(editor, nodeList);
+
+            // // Push nodes to blockquote
+            var e = document.createElement('blockquote');
+            nodeList[0].parentNode.insertBefore(e, nodeList[0]);
+            for (var i=0; i<nodeList.length; i++) {
+                e.appendChild(nodeList[i]);
+            }
+
+            // Select new node
+            editor.setRange(e);
+        }
+        editor.showToolbar();
+    }
 });

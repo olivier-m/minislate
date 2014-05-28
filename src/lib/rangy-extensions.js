@@ -140,7 +140,7 @@ rangy.api.createCoreModule('RangyExtensions', [], function(api) {
     };
 
     api.dom.replaceNodeByContents = function(node) {
-        var content = this.getDocument().createDocumentFragment();
+        var content = this.getDocument(node).createDocumentFragment();
 
         for (var i=0; i<node.childNodes.length; i++) {
             content.appendChild(node.childNodes[i].cloneNode(true));
