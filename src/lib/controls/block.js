@@ -7,6 +7,7 @@ var _util = require('../util'),
 
     Class = _util.Class,
     extend = _util.extend,
+    _ = _util._,
     Button = _controls.Button;
 
 
@@ -175,43 +176,57 @@ exports.Blockquote = Class(Block, {
 
     click: function() {
         var editor = this.toolbar.editor,
-            selection = editor.getSelection(),
-            nodeList = editor.getTopNodes(),
-            quoteNodes = editor.filterTopNodeNames('blockquote');
+            selection = editor.getSelection();
 
-        if (selection.isCollapsed && nodeList.length === 0) {
+        if (selection.isCollapsed && editor.getTopNodes().length === 0) {
             return;
         }
 
-        if (quoteNodes.length > 0) {
+        if (editor.filterTopNodeNames('blockquote').length > 0) {
             // Remove blockquote
-            selection = rangy.saveSelection();
-            rangy.dom.replaceNodeByContents(quoteNodes[0]);
-            rangy.restoreSelection(selection);
-            rangy.removeMarkers(selection);
+            this.removeBlockquote();
         } else {
             // Insert blockquote
-            // TODO: improve this
-            var node = nodeList[nodeList.length - 1];
-            if (node) {
-                nodeList = [node];
-            } else {
-                nodeList = selection.getSurroundingNodes();
-            }
-
-            // Expand selection to top nodes
-            editor.setRange.apply(editor, nodeList);
-
-            // // Push nodes to blockquote
-            var e = document.createElement('blockquote');
-            nodeList[0].parentNode.insertBefore(e, nodeList[0]);
-            for (var i=0; i<nodeList.length; i++) {
-                e.appendChild(nodeList[i]);
-            }
-
-            // Select new node
-            editor.setRange(e);
+            this.insertBlockquote();
         }
         editor.showToolbar();
+    },
+
+    insertBlockquote: function() {
+        var editor = this.toolbar.editor,
+            nodeList = editor.filterTopNodeNames.apply(editor, editor.BLOCK_NODES),
+            node = nodeList.length > 0 ? nodeList[0] : null,
+            surroundingBlocks = editor.getSurroundingNodes(function(n) {
+                return editor.BLOCK_NODES.indexOf(n.nodeName.toUpperCase()) !== -1;
+            });
+
+        if (surroundingBlocks.length > 0) {
+            nodeList = surroundingBlocks;
+        } else if (node) {
+            nodeList = [node];
+        } else {
+            nodeList = editor.getSurroundingNodes();
+        }
+
+        // Expand selection to top nodes
+        editor.setRange.apply(editor, nodeList);
+        nodeList = editor.getSurroundingNodes();
+
+        // Push nodes to blockquote
+        var e = document.createElement('blockquote');
+        nodeList[0].parentNode.insertBefore(e, nodeList[0]);
+        _.each(nodeList, e.appendChild, e);
+
+        // Set new range
+        editor.setRange(e);
+    },
+
+    removeBlockquote: function() {
+        var nodeList = this.toolbar.editor.filterTopNodeNames('blockquote'),
+            selection = rangy.saveSelection();
+
+        rangy.dom.replaceNodeByContents(nodeList[0]);
+        rangy.restoreSelection(selection);
+        rangy.removeMarkers(selection);
     }
 });
