@@ -1,5 +1,6 @@
 /* global require:true */
 var rangy = require('../vendor/rangy/core');
+var _ = require('./util')._;
 
 rangy.api.createCoreModule('RangyExtensions', [], function(api) {
     //
@@ -77,20 +78,9 @@ rangy.api.createCoreModule('RangyExtensions', [], function(api) {
             result.push(node);
         }
 
-        if (typeof(filter) !== 'function') {
-            return result;
-        }
-
-        var _result = result;
-        result = [];
-        for (var i=0; i<_result.length; i++) {
-            if (filter(_result[i])) {
-                result.push(_result[i]);
-            }
-        }
-        return result;
+        return typeof(filter) === 'function' ? _.filter(result, filter) : result;
     };
-    api.selectionPrototype.getSurroundingNodes = function() {
+    api.selectionPrototype.getSurroundingNodes = function(filter) {
         var nodes = this.getBoundaryNodes(),
             parent = this.getEnclosingNode(),
             started = false,
@@ -116,7 +106,7 @@ rangy.api.createCoreModule('RangyExtensions', [], function(api) {
                 break;
             }
         }
-        return result;
+        return typeof(filter) === 'function' ? _.filter(result, filter) : result;
     };
 
     //
@@ -142,9 +132,9 @@ rangy.api.createCoreModule('RangyExtensions', [], function(api) {
     api.dom.replaceNodeByContents = function(node) {
         var content = this.getDocument(node).createDocumentFragment();
 
-        for (var i=0; i<node.childNodes.length; i++) {
-            content.appendChild(node.childNodes[i].cloneNode(true));
-        }
+        _.each(node.childNodes, function(n) {
+            content.appendChild(n.cloneNode(true));
+        });
 
         node.parentNode.replaceChild(content, node);
     };

@@ -4,6 +4,7 @@ var rangy = require('../vendor/rangy/core').api;
 var extend = require('./util').extend;
 var Class = require('./util').Class;
 var Toolbar = require('./toolbar').Toolbar;
+var _ = require('./util')._;
 
 /*
  * Editor (main)
@@ -16,6 +17,7 @@ var Editor = Class(Object, {
         classPrefix: 'editor-',
         fontAwesomeEnabled: true
     },
+    BLOCK_NODES: 'P H1 H2 H3 H4 H5 H6 UL OL PRE DL DIV NOSCRIPT BLOCKQUOTE FORM HR TABLE FIELDSET ADDRESS'.split(' '),
 
     init: function(elements, options) {
         if (!window.getSelection) {
@@ -275,17 +277,19 @@ var Editor = Class(Object, {
         return selection.getTopNodes(this._currentEditor, filter);
     },
 
-    getSurroundingNodes: function() {
+    getSurroundingNodes: function(filter) {
         var selection = this.getSelection();
         if (selection.rangeCount !== 1) {
             return [];
         }
 
-        return selection.getSurroundingNodes();
+        return selection.getSurroundingNodes(filter);
     },
 
     filterTopNodeNames: function() {
-        var names = [].slice.call(arguments);
+        var names = _.map(arguments, function(v) {
+            return v.toLowerCase();
+        });
         return this.getTopNodes(function(n) {
             return names.indexOf(n.nodeName.toLowerCase()) !== -1;
         });
