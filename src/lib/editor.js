@@ -127,7 +127,7 @@ var Editor = Class(Object, {
         // Restore focus on editor element when showing toolbar
         var self = this;
         this.toolbar.element.addEventListener('toolbar.show', function() {
-            self._currentEditor.focus();
+            self.focus();
         });
 
         return this;
@@ -135,6 +135,12 @@ var Editor = Class(Object, {
 
     exec: function(cmd, arg) {
         document.execCommand(cmd, false, arg);
+    },
+
+    focus: function() {
+        if (this._currentEditor) {
+            this._currentEditor.focus();
+        }
     },
 
     showToolbar: function() {
@@ -174,8 +180,14 @@ var Editor = Class(Object, {
     setToolbarPosition: function() {
         var selection = this.getSelection(),
             range = this.getRange(),
-            node = selection.getEnclosingNode(),
-            boundary = node.getBoundingClientRect(),
+            node = selection.getEnclosingNode();
+
+        if (node.nodeName.toLowerCase() === 'br') {
+            // Edge case with chrome
+            node = node.parentNode;
+        }
+
+        var boundary = node.getBoundingClientRect(),
             height = this.toolbar.element.offsetHeight,
             width = this.toolbar.element.offsetWidth;
 
