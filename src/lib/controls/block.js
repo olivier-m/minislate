@@ -190,9 +190,8 @@ exports.Blockquote = Class(Block, {
                 if(node.previousSibling && node.previousSibling.textContent === '') {
                     node.previousSibling.parentNode.removeChild(node.previousSibling);
                     parent.parentNode.insertBefore(node, parent.nextSibling);
-                    editor.setRange(node.firstChild);
-                    editor.getRange().collapse();
-                    editor.showToolbar();
+                    editor.setRange(node);
+                    editor.getSelection().collapse(node);
                 }
             }
         });
