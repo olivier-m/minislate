@@ -119,15 +119,24 @@ var Editor = Class(Object, {
     },
 
     initToolbar: function() {
+        var self = this;
+
         this.toolbar = new Toolbar(this, {
             classPrefix: this.options.classPrefix,
             fontAwesomeEnabled: this.options.fontAwesomeEnabled
         });
 
         // Restore focus on editor element when showing toolbar
-        var self = this;
         this.toolbar.element.addEventListener('toolbar.show', function() {
             self.focus();
+        });
+
+        // Remove all residual markers when hidding toolbar
+        this.toolbar.element.addEventListener('toolbar.hide', function() {
+            var elements = document.querySelectorAll('span.rangySelectionBoundary');
+            _.each(elements, function(e) {
+                e.parentNode.removeChild(e);
+            });
         });
 
         return this;
