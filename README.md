@@ -16,8 +16,7 @@ Minislate:
 
 ## Download and install
 
-First, [download Minislate](http://olivier-m.github.io/minislate/dist/minislate.zip), unzip it and copy the
-following files to a location of your choice:
+First, [download Minislate](https://github.com/olivier-m/minislate/releases), unzip it and copy the following files to a location of your choice:
 
 - `css/minislate-full.min.css`
 - `css/fonts` (keep fonts in the same folder as the css file)
@@ -35,8 +34,7 @@ At the bottom of the page, before the `</body>` tag, add this code:
 <script src="js/minislate.js"></script>
 <script>
 window.addEventListener('DOMContentLoaded', function() {
-  var editor = new Minislate('#editable', {
-  });
+  var editor = new Minislate.simpleEditor('#editable');
 });
 </script>
 ```
