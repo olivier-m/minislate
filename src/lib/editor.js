@@ -153,7 +153,7 @@ var Editor = Class(Object, {
     },
 
     showToolbar: function() {
-        this.hideDialog();
+        this.toolbar.hideDialog();
         this.toolbar.show();
         this.setToolbarPosition();
         window.addEventListener('resize', this._resizeHandler);
@@ -180,28 +180,23 @@ var Editor = Class(Object, {
         return this;
     },
 
-    hideDialog: function() {
-        this.toolbar.hideDialog();
-        this.setToolbarPosition();
-        return this;
-    },
-
     setToolbarPosition: function() {
         var selection = this.getSelection(),
             range = this.getRange(),
-            node = selection.getEnclosingNode();
-
-        if (node.nodeName.toLowerCase() === 'br') {
-            // Edge case with chrome
-            node = node.parentNode;
-        }
-
-        var boundary = node.getBoundingClientRect(),
+            node = selection.getEnclosingNode(),
             height = this.toolbar.element.offsetHeight,
-            width = this.toolbar.element.offsetWidth;
+            width = this.toolbar.element.offsetWidth,
+            boundary;
 
         if (!selection.isCollapsed && rangy.util.isHostMethod(range.nativeRange, 'getBoundingClientRect')) {
+            // If getBoundingClientRect is enabled on selection
             boundary = range.nativeRange.getBoundingClientRect();
+        } else {
+            // Otherwise or when selection is collapsed, use the top enclosing node as boundary node
+            while (node.parentNode.childNodes.length === 1) {
+                node = node.parentNode;
+            }
+            boundary = node.getBoundingClientRect();
         }
 
         // Top position
@@ -213,11 +208,9 @@ var Editor = Class(Object, {
         }
 
         // Left position
-        var left = boundary.left;
+        var left = boundary.left - this.options.diffLeft;
         if (this._currentEditor.offsetWidth < width + boundary.left) {
-            left =
-                this._currentEditor.offsetWidth + this._currentEditor.offsetLeft -
-                width - this.options.diffLeft;
+            left = boundary.right - width + this.options.diffLeft;
         }
 
         this.toolbar.move(top, left);
