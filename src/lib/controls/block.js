@@ -18,6 +18,13 @@ var Block = Class(Button, {
     command: 'formatblock',
     defaults: extend({}, Button.prototype.defaults),
 
+    init: function() {
+        Button.prototype.init.apply(this, arguments);
+        this.BLOCK_NODES = _.filter(this.toolbar.editor.BLOCK_NODES, function(v) {
+            return ['ul', 'ol'].indexOf(v.toLowerCase()) === -1;
+        });
+    },
+
     isHighlighted: function() {
         return this.toolbar.editor.filterTopNodeNames.apply(
             this.toolbar.editor, this.tagList
@@ -31,7 +38,7 @@ var Block = Class(Button, {
         if (this.command === 'formatblock') {
             // Expand selection before formating to avoid some issues with webkit
             if (!this.isHighlighted()) {
-                topNodes = editor.filterTopNodeNames.apply(editor, editor.BLOCK_NODES);
+                topNodes = editor.filterTopNodeNames.apply(editor, this.BLOCK_NODES);
                 if (topNodes.length > 0) {
                     editor.setRange(topNodes[0]);
                 }
@@ -120,18 +127,46 @@ var BaseList = Class(Block, {
 
         editor.on('keydown', function(evt) {
             if (evt.which === 9 && !evt.ctrlKey && !evt.metaKey) {
-                var node = editor.filterTopNodeNames('li');
-                if (node.length === 0) {
+                var topNodes = editor.filterTopNodeNames('ul', 'ol');
+                if (topNodes.length === 0 || topNodes[0].nodeName.toLowerCase() !== self.tag) {
                     return;
                 }
-                node = node[0];
-                if (node.parentNode.nodeName.toLowerCase() === self.tag) {
-                    evt.preventDefault();
-                    // TODO: this produces deprecated HTML code for nested lists. Should be fixed.
-                    editor.exec(evt.shiftKey ? 'outdent' : 'indent');
+
+                evt.preventDefault();
+                if (evt.shiftKey) {
+                    editor.exec('outdent');
+                } else {
+                    editor.exec('indent');
                 }
             }
         });
+    },
+    click: function() {
+        var editor = this.toolbar.editor,
+            topListNodes = editor.filterTopNodeNames('ul', 'ol');
+
+        if (topListNodes.length > 0) {
+            if (topListNodes[0].nodeName.toLowerCase() === this.tag) {
+                return;
+            }
+
+            // Changing list type
+            var node = topListNodes[0],
+                selection = rangy.saveSelection(),
+                e = document.createElement(this.tag);
+
+            node.parentNode.insertBefore(e, node);
+            _.each([].slice.call(node.childNodes), function(n) {
+                e.appendChild(n);
+            });
+            node.parentNode.removeChild(node);
+            rangy.restoreSelection(selection);
+            rangy.removeMarkers(selection);
+            editor.showToolbar();
+        } else {
+            // Insert a list
+            Block.prototype.click.call(this);
+        }
     }
 });
 
