@@ -170,9 +170,10 @@ exports.Blockquote = Class(Block, {
 
     init: function() {
         Block.prototype.init.apply(this, arguments);
+        var self = this,
+            editor = this.toolbar.editor;
 
         // Leave blockquote after an empty paragraph
-        var editor = this.toolbar.editor;
         editor.on('keyup', function(evt) {
             if (evt.which === 13 && !evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
                 var node = editor.filterTopNodeNames('blockquote');
@@ -192,6 +193,23 @@ exports.Blockquote = Class(Block, {
                     parent.parentNode.insertBefore(node, parent.nextSibling);
                     editor.setRange(node);
                     editor.getSelection().collapse(node);
+                }
+            }
+        });
+
+        // Indent / unindent blockquote
+        editor.on('keydown', function(evt) {
+            if (evt.which === 9 && !evt.ctrlKey && !evt.metaKey) {
+                var node = editor.filterTopNodeNames('blockquote');
+                if (node.length === 0) {
+                    return;
+                }
+
+                evt.preventDefault();
+                if (evt.shiftKey) {
+                    self.removeBlockquote();
+                } else {
+                    self.insertBlockquote();
                 }
             }
         });
