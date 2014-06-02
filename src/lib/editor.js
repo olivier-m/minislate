@@ -361,7 +361,8 @@ exports.Editor = Editor;
 var controls = {
     Menu: require('./controls').Menu,
     inline: require('./controls/inline'),
-    block: require('./controls/block')
+    block: require('./controls/block'),
+    media: require('./controls/media')
 };
 
 exports.simpleEditor = Class(Editor, {
@@ -394,7 +395,7 @@ exports.simpleEditor = Class(Editor, {
         this.toolbar.addControl(controls.inline.Underline, 'underline');
         this.toolbar.addControl(controls.inline.StrikeThrough, 'strike');
         this.toolbar.addControl(controls.inline.Link, 'link');
-        this.toolbar.addControl(controls.inline.Image, 'image');
-        this.toolbar.addControl(controls.inline.Oembed, 'oembed');
+        this.toolbar.addControl(controls.media.Image, 'image');
+        this.toolbar.addControl(controls.media.Oembed, 'oembed');
     }
 });
