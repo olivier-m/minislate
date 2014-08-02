@@ -19,22 +19,21 @@ var Editor = Class(Object, {
     },
     BLOCK_NODES: 'P H1 H2 H3 H4 H5 H6 UL OL PRE DL DIV NOSCRIPT BLOCKQUOTE FORM HR TABLE FIELDSET ADDRESS'.split(' '),
 
-    init: function(elements, options) {
+    init: function(element, options) {
         if (!window.getSelection) {
             throw new Error('Browser features missing.');
         }
 
-        this.elements = typeof elements === 'string' ? document.querySelectorAll(elements) : elements;
-        if (this.elements.length === 0) {
+        if (typeof element !== 'object') {
             return;
         }
+        this.element = element;
 
         if (!rangy.initialized) {
             rangy.init();
         }
 
         this.isActive = true;
-        this.id = this.elements.length + 1;
         this.options = extend({}, this.defaults, options);
 
         // Internal properties
@@ -52,38 +51,24 @@ var Editor = Class(Object, {
         })(this);
 
         // Init editor
-        this.initElements()
+        this.initElement()
             .initToolbar()
             .bindSelect()
             .bindTyping();
     },
 
-    iter: function(callback) {
-        var i;
-        for (i=0; i<this.elements.length; i++) {
-            callback.call(this, this.elements[i]);
-        }
-        return this;
-    },
-
     on: function(name, handler) {
-        return this.iter(function(node) {
-            node.addEventListener(name, handler);
-        });
+        this.element.addEventListener(name, handler);
     },
 
     off: function(name, handler) {
-        return this.iter(function(node) {
-            node.removeEventListener(name, handler);
-        });
+        this.element.removeEventListener(name, handler);
     },
 
-    initElements: function() {
+    initElement: function() {
         var self = this;
-        this.iter(function(node) {
-            node.setAttribute('contentEditable', true);
-            node.setAttribute('data-editor-element', true);
-        });
+        this.element.setAttribute('contentEditable', true);
+        this.element.setAttribute('data-editor-element', true);
 
         this.on('focus', function() {
             self._onFocus();
@@ -133,7 +118,7 @@ var Editor = Class(Object, {
 
         // Remove all residual markers when hidding toolbar
         this.toolbar.element.addEventListener('toolbar.hide', function() {
-            var elements = document.querySelectorAll('span.rangySelectionBoundary');
+            var elements = self.element.querySelectorAll('span.rangySelectionBoundary');
             _.each(elements, function(e) {
                 e.parentNode.removeChild(e);
             });
@@ -221,27 +206,26 @@ var Editor = Class(Object, {
 
         rangy.restoreSelection(selection);
         rangy.removeMarkers(selection);
-        this._getSelectionElement().focus();
+        this.element.focus();
         if (showToolbar) {
             this.showToolbar();
         }
     },
 
     _onFocus: function() {
-        this._currentEditor = this._getSelectionElement();
+        this._currentEditor = this.element;
     },
 
     _onSelect: function(evt) {
-        var elements = [].slice.call(this.elements);
-        elements.push(this.toolbar.element);
+        var elements = [this.element, this.toolbar.element];
 
         if (!rangy.dom.hasParents(evt.target, elements)) {
             this.hideToolbar();
-            this._currentEditor = false;
+            this._currentEditor = null;
             return;
         }
 
-        this._currentEditor = this._getSelectionElement();
+        this._currentEditor = this.element;
         if (!rangy.dom.hasParents(evt.target, [this.toolbar.element])) {
             this.showToolbar();
         }
@@ -311,38 +295,6 @@ var Editor = Class(Object, {
         return this.getTopNodes(function(n) {
             return names.indexOf(n.nodeName.toLowerCase()) !== -1;
         });
-    },
-
-    _getSelectionElement: function() {
-        var range = this.getRange(),
-            current = range.commonAncestorContainer,
-            parent = current.parentNode,
-            result;
-
-        var getEditor = function(e) {
-            var parent = e;
-            try {
-                while (!parent.getAttribute('data-editor-element')) {
-                    parent = parent.parentNode;
-                }
-            } catch (errb) {
-                return false;
-            }
-            return parent;
-        };
-
-        // First try on current node
-        try {
-            if (current.getAttribute('data-editor-element')) {
-                result = current;
-            } else {
-                result = getEditor(parent);
-            }
-        // If not search in the parent nodes.
-        } catch (err) {
-            result = getEditor(parent);
-        }
-        return result;
     },
 
     // Cleanup operations

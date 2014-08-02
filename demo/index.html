@@ -9,7 +9,7 @@
     font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
     font-size: 16px;
   }
-  #editable, #noneditable {
+  body > div, body > p {
     width: 80%;
     margin: 0 auto;
   }
@@ -17,7 +17,7 @@
 </head>
 <body>
 
-<div id="editable">
+<div class="editable">
 <h1>Test</h1>
 
 
@@ -37,17 +37,33 @@ id tortor et, facilisis malesuada eros. Nam vitae eleifend augue. Pellentesque e
 feugiat vehicula vel sit amet enim.</p>
 </div>
 
-<div id="noneditable">
+
+<div class="noneditable">
 <h2>Non editable</h2>
 
 <p>Quisque id tortor lectus. Cras non leo non metus luctus faucibus. Sed in nisl ultricies,
 venenatis turpis id, dignissim eros. Donec pharetra gravida ligula at consequat.</p>
 </div>
 
+
+<div class="editable">
+<h2>Another editable section.</h2>
+<p>Aspernatur perspiciatis sunt maiores nam repellendus laboriosam necessitatibus deserunt, harum
+iusto molestiae consectetur qui sequi numquam deleniti pariatur.</p>
+</div>
+
 <script src="js/minislate.js"></script>
 <script>
 window.addEventListener('DOMContentLoaded', function() {
-    this.editor = new Minislate.simpleEditor('#editable');
+    function newEditor(element) {
+      var editor = new Minislate.simpleEditor(element);
+    }
+
+    var elements = document.querySelectorAll('.editable');
+    for (var i=0; i<elements.length; i++) {
+      newEditor(elements[i]);
+    }
+
 });
 </script>
 </body>
