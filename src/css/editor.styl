@@ -1,0 +1,128 @@
+@import "base"
+
+.{editor-class-prefix}toolbar
+    position absolute
+    top 0
+    left 0
+    z-index 2000
+
+    background-color editor-bgcolor
+    color editor-fgcolor
+    border 1px solid lighten(editor-bgcolor, -40%)
+
+    font-family sans-serif
+    font-size 16px
+
+    border-radius 3px
+    drop-shadow()
+    animation pop-upwards 100ms forward linear
+    transition top .1s ease-out, left .1s ease-out
+
+.{editor-class-prefix}controls
+    overflow hidden
+    margin 0
+    padding 0
+    list-style none
+    width 100%
+    background-image linear-gradient(editor-bgcolor, lighten(editor-bgcolor, -20%))
+
+.{editor-class-prefix}controls li
+    display block
+    float left
+    margin 0
+    padding 0
+    line-height 1
+    font-size 13px
+
+    button
+        display block
+        padding 8px 10px
+        margin 0
+        cursor pointer
+        background-color transparent
+        color editor-fgcolor
+        font-size 1em
+        border 0
+        border-right 1px solid lighten(editor-bgcolor, -40%)
+        border-left 1px solid editor-bgcolor
+        outline none
+
+        &::-moz-focus-inner
+            border 0
+            padding 0
+
+        &:hover
+        &:focus
+            background-image linear-gradient(lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, -10%))
+
+        &.{editor-class-prefix}highlight, &:active
+            background-image linear-gradient(editor-bgcolor, lighten(editor-bgcolor, 20%))
+
+        &.{editor-class-prefix}highlight:hover
+            background-image linear-gradient(lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, 30%))
+
+        i.fa
+            font-weight normal
+            span
+                display none
+
+    &.{editor-class-prefix}menu ul
+        position absolute
+        border-radius 3px
+        width auto
+        drop-shadow()
+
+        li
+            float none
+            display block
+
+            button
+                width 10em
+                text-align left
+                border 0
+                border-bottom 1px solid lighten(editor-bgcolor, -30%)
+                border-top 1px solid editor-bgcolor
+
+                em
+                    font-size 0.8em
+                    font-style normal
+                    color lighten(editor-fgcolor, -30%)
+
+    &.{editor-class-prefix}menu i.fa-chevron-down
+        font-size 0.8em
+        color lighten(editor-fgcolor, -50%)
+
+    &.{editor-class-prefix}menu span.{editor-class-prefix}menu-arrow
+        color lighten(editor-fgcolor, -50%)
+
+.{editor-class-prefix}dialog
+    padding 6px
+    font-size 12px
+
+    input[type=text]
+        background editor-input-bgcolor
+        color editor-input-fgcolor
+        border 1px solid lighten(editor-input-bgcolor, -20%);
+        padding 3px
+        vertical-align baseline
+
+    button
+        padding 3px 5px
+        margin 0 0 0 4px
+        cursor pointer
+        background-image linear-gradient(lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, 20%))
+        color editor-fgcolor
+        font-size 1em
+        border 1px solid lighten(editor-bgcolor, 19.99%)
+        border-radius 2px
+        outline none
+
+        &::-moz-focus-inner
+            border 0
+            padding 0
+
+        &:hover, &:focus
+            background-image linear-gradient(lighten(editor-bgcolor, 30%), lighten(editor-bgcolor, 20%))
+
+        &:active
+            background-image linear-gradient(lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, 20%));

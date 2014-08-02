@@ -51,20 +51,20 @@ module.exports = function(grunt) {
             }
         },
 
-        less: {
+        stylus: {
+            options: {
+                compress: false
+            },
             dev: {
                 files: {
-                    'dist/css/<%= pkg.name.toLowerCase() %>.css': 'src/css/editor.less',
-                    'dist/css/<%= pkg.name.toLowerCase() %>-full.css': 'src/css/editor-full.less'
+                    'dist/css/<%= pkg.name.toLowerCase() %>.css': 'src/css/editor.styl',
+                    'dist/css/<%= pkg.name.toLowerCase() %>-full.css': 'src/css/editor-full.styl'
                 }
             },
             dist: {
                 files: {
-                    'dist/css/<%= pkg.name.toLowerCase() %>.min.css': 'src/css/editor.less',
-                    'dist/css/<%= pkg.name.toLowerCase() %>-full.min.css': 'src/css/editor-full.less'
-                },
-                options: {
-                    cleancss: true
+                    'dist/css/<%= pkg.name.toLowerCase() %>.min.css': 'src/css/editor.styl',
+                    'dist/css/<%= pkg.name.toLowerCase() %>-full.min.css': 'src/css/editor-full.styl'
                 }
             }
         },
@@ -120,9 +120,17 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            dev: {
-                files: ['package.json', 'src/**'],
-                tasks: ['build', 'copy:dist', 'uglify:dist', 'less:dev', 'copy:fonts']
+            css: {
+                files: ['src/css/*.styl'],
+                tasks: ['stylus:dev']
+            },
+            js: {
+                files: ['src/*.js', 'src/**/*.js'],
+                tasks: ['build', 'copy:dist', 'uglify:dist']
+            },
+            fonts: {
+                files: ['src/css/fonts/*'],
+                tasks: ['copy:fonts']
             }
         },
 
@@ -141,15 +149,15 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-contrib-less');
+    grunt.loadNpmTasks('grunt-contrib-stylus');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-gh-pages');
     grunt.loadNpmTasks('grunt-zip');
 
     grunt.registerTask('build', ['browserify']);
-    grunt.registerTask('dist', ['build', 'copy:dist', 'uglify', 'less', 'copy:fonts', 'zip']);
+    grunt.registerTask('dist', ['build', 'copy:dist', 'uglify', 'stylus', 'copy:fonts', 'zip']);
     grunt.registerTask('rangy', ['copy:rangy', 'bundle:rangy']);
-    grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch:dev']);
+    grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch']);
     grunt.registerTask('release', ['clean', 'dist', 'gh-pages']);
 };
