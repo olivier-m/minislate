@@ -113,7 +113,8 @@ rangy.api.createCoreModule('RangyExtensions', [], function(api) {
     // DOM extensions
     //
     api.dom.hasParents = function(node, parents) {
-        while ([document, document.body].indexOf(node) === -1) {
+        // node may be inside a documentFragment outside document, so we should also test null
+        while ([ document, document.body ].indexOf(node) === -1 && node != null) {
             if (parents.indexOf(node) !== -1) {
                 return true;
             }
