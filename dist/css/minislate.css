@@ -3,24 +3,15 @@
   top: 0;
   left: 0;
   z-index: 2000;
-  background-color: #333333;
-  color: #ffffff;
-  border: 1px solid #000000;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #1f1f1f;
   font-family: sans-serif;
   font-size: 16px;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
   border-radius: 3px;
-  -webkit-box-shadow: 2px 5px 8px rgba(0, 0, 0, 0.6);
-  -moz-box-shadow: 2px 5px 8px rgba(0, 0, 0, 0.6);
-  box-shadow: 2px 5px 8px rgba(0, 0, 0, 0.6);
+  box-shadow: 2 5 8 rgba(0,0,0,0.6);
   -webkit-animation: pop-upwards 100ms forward linear;
-  -moz-animation: pop-upwards 100ms forward linear;
-  -o-animation: pop-upwards 100ms forward linear;
-  animation: pop-upwards 100ms forward linear;
-  -webkit-transition: top 0.1s ease-out, left 0.1s ease-out;
-  -moz-transition: top 0.1s ease-out, left 0.1s ease-out;
-  -o-transition: top 0.1s ease-out, left 0.1s ease-out;
+          animation: pop-upwards 100ms forward linear;
   transition: top 0.1s ease-out, left 0.1s ease-out;
 }
 .editor-controls {
@@ -29,12 +20,7 @@
   padding: 0;
   list-style: none;
   width: 100%;
-  background-color: #333333;
-  background-image: -webkit-linear-gradient(top, #333333, #111111);
-  background-image: -moz-linear-gradient(top, #333333, #111111);
-  background-image: -o-linear-gradient(top, #333333, #111111);
-  background-image: -ms-linear-gradient(top, #333333, #111111);
-  background-image: linear-gradient(top, #333333, #111111);
+  background-image: linear-gradient(to top, #333, #292929);
 }
 .editor-controls li {
   display: block;
@@ -50,41 +36,28 @@
   margin: 0;
   cursor: pointer;
   background-color: transparent;
-  color: #ffffff;
+  background-image: none;
+  color: #fff;
   font-size: 1em;
   border: 0;
-  border-right: 1px solid #000000;
-  border-left: 1px solid #333333;
+  border-right: 1px solid #1f1f1f;
+  border-left: 1px solid #333;
   outline: none;
 }
 .editor-controls li button::-moz-focus-inner {
   border: 0;
   padding: 0;
 }
-.editor-controls li button:hover {
-  background-color: #444444;
-  background-image: -webkit-linear-gradient(top, #444444, #222222);
-  background-image: -moz-linear-gradient(top, #444444, #222222);
-  background-image: -o-linear-gradient(top, #444444, #222222);
-  background-image: -ms-linear-gradient(top, #444444, #222222);
-  background-image: linear-gradient(top, #444444, #222222);
+.editor-controls li button:hover,
+.editor-controls li button:focus {
+  background-image: linear-gradient(to top, #474747, #2e2e2e);
 }
 .editor-controls li button.editor-highlight,
 .editor-controls li button:active {
-  background-color: #333333;
-  background-image: -webkit-linear-gradient(top, #333333, #555555);
-  background-image: -moz-linear-gradient(top, #333333, #555555);
-  background-image: -o-linear-gradient(top, #333333, #555555);
-  background-image: -ms-linear-gradient(top, #333333, #555555);
-  background-image: linear-gradient(top, #333333, #555555);
+  background-image: linear-gradient(to top, #333, #5c5c5c);
 }
 .editor-controls li button.editor-highlight:hover {
-  background-color: #444444;
-  background-image: -webkit-linear-gradient(top, #444444, #777777);
-  background-image: -moz-linear-gradient(top, #444444, #777777);
-  background-image: -o-linear-gradient(top, #444444, #777777);
-  background-image: -ms-linear-gradient(top, #444444, #777777);
-  background-image: linear-gradient(top, #444444, #777777);
+  background-image: linear-gradient(to top, #474747, #707070);
 }
 .editor-controls li button i.fa {
   font-weight: normal;
@@ -96,9 +69,7 @@
   position: absolute;
   border-radius: 3px;
   width: auto;
-  -webkit-box-shadow: 2px 5px 8px rgba(0, 0, 0, 0.6);
-  -moz-box-shadow: 2px 5px 8px rgba(0, 0, 0, 0.6);
-  box-shadow: 2px 5px 8px rgba(0, 0, 0, 0.6);
+  box-shadow: 2 5 8 rgba(0,0,0,0.6);
 }
 .editor-controls li.editor-menu ul li {
   float: none;
@@ -108,13 +79,13 @@
   width: 10em;
   text-align: left;
   border: 0;
-  border-bottom: 1px solid #000000;
-  border-top: 1px solid #333333;
+  border-bottom: 1px solid #242424;
+  border-top: 1px solid #333;
 }
 .editor-controls li.editor-menu ul li button em {
   font-size: 0.8em;
   font-style: normal;
-  color: #bbbbbb;
+  color: #b3b3b3;
 }
 .editor-controls li.editor-menu i.fa-chevron-down {
   font-size: 0.8em;
@@ -128,9 +99,9 @@
   font-size: 12px;
 }
 .editor-dialog input[type=text] {
-  background: #cccccc;
-  color: #000000;
-  border: 1px solid #aaaaaa;
+  background: #ccc;
+  color: #000;
+  border: 1px solid #a3a3a3;
   padding: 3px;
   vertical-align: baseline;
 }
@@ -138,15 +109,10 @@
   padding: 3px 5px;
   margin: 0 0 0 4px;
   cursor: pointer;
-  background-color: #444444;
-  background-image: -webkit-linear-gradient(#555555, #444444, #000000);
-  background-image: -moz-linear-gradient(#555555, #444444, #000000);
-  background-image: -o-linear-gradient(#555555, #444444, #000000);
-  background-image: -ms-linear-gradient(#555555, #444444, #000000);
-  background-image: linear-gradient(#555555, #444444, #000000);
-  color: #ffffff;
+  background-image: linear-gradient(to top, #474747, #5c5c5c);
+  color: #fff;
   font-size: 1em;
-  border: 1px solid #666666;
+  border: 1px solid #5c5c5c;
   border-radius: 2px;
   outline: none;
 }
@@ -156,8 +122,8 @@
 }
 .editor-dialog button:hover,
 .editor-dialog button:focus {
-  background-image: linear-gradient(#666666, #555555);
+  background-image: linear-gradient(to top, #707070, #5c5c5c);
 }
 .editor-dialog button:active {
-  background-image: linear-gradient(#444444, #555555);
+  background-image: linear-gradient(to top, #474747, #5c5c5c);
 }

@@ -1,6 +1,6 @@
 /*!
  * Minislate
- * Version: 0.2.0
+ * Version: 0.3.0
  *
  * Includes Rangy
  * https://code.google.com/p/rangy/
@@ -8,7 +8,7 @@
  * Copyright 2014, Olivier Meunier and contributors
  * Released under the MIT license
  *
- * Date: 2014-06-02T12:57:46Z
+ * Date: 2014-11-28T10:22:56Z
  */
 !function(e) {
     if ("object" == typeof exports && "undefined" != typeof module) module.exports = e(); else if ("function" == typeof define && define.amd) define([], e); else {
@@ -360,7 +360,7 @@
             exports.Menu = Menu;
             exports.Dialog = Dialog;
         }, {
-            "./util": 8
+            "./util": 9
         } ],
         2: [ function(_dereq_, module, exports) {
             var _util = _dereq_("../util"), _controls = _dereq_("../controls"), rangy = _dereq_("../../vendor/rangy/core").api, Class = _util.Class, extend = _util.extend, _ = _util._, Button = _controls.Button;
@@ -587,9 +587,9 @@
                 }
             });
         }, {
-            "../../vendor/rangy/core": 10,
+            "../../vendor/rangy/core": 11,
             "../controls": 1,
-            "../util": 8
+            "../util": 9
         } ],
         3: [ function(_dereq_, module, exports) {
             var _util = _dereq_("../util"), _controls = _dereq_("../controls"), rangy = _dereq_("../../vendor/rangy/core").api, Class = _util.Class, extend = _util.extend, _ = _util._, Button = _controls.Button, Dialog = _controls.Dialog;
@@ -778,9 +778,9 @@
                 }
             });
         }, {
-            "../../vendor/rangy/core": 10,
+            "../../vendor/rangy/core": 11,
             "../controls": 1,
-            "../util": 8
+            "../util": 9
         } ],
         4: [ function(_dereq_, module, exports) {
             var _util = _dereq_("../util"), _controls = _dereq_("../controls"), rangy = _dereq_("../../vendor/rangy/core").api, Class = _util.Class, extend = _util.extend, Button = _controls.Button, Dialog = _controls.Dialog;
@@ -864,9 +864,9 @@
                 }
             });
         }, {
-            "../../vendor/rangy/core": 10,
+            "../../vendor/rangy/core": 11,
             "../controls": 1,
-            "../util": 8
+            "../util": 9
         } ],
         5: [ function(_dereq_, module, exports) {
             var rangy = _dereq_("../vendor/rangy/core").api;
@@ -874,6 +874,7 @@
             var Class = _dereq_("./util").Class;
             var Toolbar = _dereq_("./toolbar").Toolbar;
             var _ = _dereq_("./util")._;
+            var HtmlCleaner = _dereq_("./html-cleaner").HtmlCleaner;
             var Editor = Class(Object, {
                 defaults: {
                     delay: 300,
@@ -883,19 +884,19 @@
                     fontAwesomeEnabled: true
                 },
                 BLOCK_NODES: "P H1 H2 H3 H4 H5 H6 UL OL PRE DL DIV NOSCRIPT BLOCKQUOTE FORM HR TABLE FIELDSET ADDRESS".split(" "),
-                init: function(elements, options) {
+                init: function(element, options) {
                     if (!window.getSelection) {
                         throw new Error("Browser features missing.");
                     }
-                    this.elements = typeof elements === "string" ? document.querySelectorAll(elements) : elements;
-                    if (this.elements.length === 0) {
+                    if (typeof element !== "object") {
                         return;
                     }
+                    this.element = element;
                     if (!rangy.initialized) {
                         rangy.init();
                     }
                     this.isActive = true;
-                    this.id = this.elements.length + 1;
+                    this.isSelected = false;
                     this.options = extend({}, this.defaults, options);
                     this._currentEditor = null;
                     this._resizeHandler = function(self) {
@@ -907,31 +908,18 @@
                             }, 250);
                         };
                     }(this);
-                    this.initElements().initToolbar().bindSelect().bindTyping();
-                },
-                iter: function(callback) {
-                    var i;
-                    for (i = 0; i < this.elements.length; i++) {
-                        callback.call(this, this.elements[i]);
-                    }
-                    return this;
+                    this.initElement().initToolbar().bindSelect().bindTyping();
                 },
                 on: function(name, handler) {
-                    return this.iter(function(node) {
-                        node.addEventListener(name, handler);
-                    });
+                    this.element.addEventListener(name, handler);
                 },
                 off: function(name, handler) {
-                    return this.iter(function(node) {
-                        node.removeEventListener(name, handler);
-                    });
+                    this.element.removeEventListener(name, handler);
                 },
-                initElements: function() {
+                initElement: function() {
                     var self = this;
-                    this.iter(function(node) {
-                        node.setAttribute("contentEditable", true);
-                        node.setAttribute("data-editor-element", true);
-                    });
+                    this.element.setAttribute("contentEditable", true);
+                    this.element.setAttribute("data-editor-element", true);
                     this.on("focus", function() {
                         self._onFocus();
                     });
@@ -951,12 +939,13 @@
                 },
                 bindTyping: function() {
                     var self = this;
-                    this.on("keyup", function() {
+                    this.on("keyup", function(evt) {
                         var selection = self.getSelection();
-                        if (selection.isCollapsed && selection.getEnclosingNode() === self._currentEditor) {
+                        if (evt.which !== 9 && selection.isCollapsed && selection.getEnclosingNode() === self._currentEditor) {
                             self.exec("formatBlock", "p");
                         }
                     });
+                    return this;
                 },
                 initToolbar: function() {
                     var self = this;
@@ -968,7 +957,7 @@
                         self.focus();
                     });
                     this.toolbar.element.addEventListener("toolbar.hide", function() {
-                        var elements = document.querySelectorAll("span.rangySelectionBoundary");
+                        var elements = self.element.querySelectorAll("span.rangySelectionBoundary");
                         _.each(elements, function(e) {
                             e.parentNode.removeChild(e);
                         });
@@ -1032,26 +1021,66 @@
                     showToolbar = typeof showToolbar === "undefined" ? true : showToolbar;
                     rangy.restoreSelection(selection);
                     rangy.removeMarkers(selection);
-                    this._getSelectionElement().focus();
+                    this.element.focus();
                     if (showToolbar) {
                         this.showToolbar();
                     }
                 },
                 _onFocus: function() {
-                    this._currentEditor = this._getSelectionElement();
+                    this._currentEditor = this.element;
                 },
                 _onSelect: function(evt) {
-                    var elements = [].slice.call(this.elements);
-                    elements.push(this.toolbar.element);
+                    var elements = [ this.element, this.toolbar.element ];
                     if (!rangy.dom.hasParents(evt.target, elements)) {
-                        this.hideToolbar();
-                        this._currentEditor = false;
+                        if (this.isSelected) {
+                            this.hideToolbar();
+                            this._currentEditor = null;
+                            this.isSelected = false;
+                        }
                         return;
                     }
-                    this._currentEditor = this._getSelectionElement();
+                    this._currentEditor = this.element;
                     if (!rangy.dom.hasParents(evt.target, [ this.toolbar.element ])) {
                         this.showToolbar();
                     }
+                    if (!this.isSelected) {
+                        this.isSelected = true;
+                        if (evt.which === 9) {
+                            this.selectStart();
+                        }
+                    }
+                },
+                selectStart: function() {
+                    var selection = this.getSelection();
+                    if (!selection.isCollapsed) {
+                        return;
+                    }
+                    if (this.element.childNodes.length > 0 && this.element.firstChild.nodeType === 3) {
+                        if (this.element.firstChild.textContent.replace(/^\s*(.*?)\s*$/, "$1") === "") {
+                            this.element.removeChild(this.element.firstChild);
+                        }
+                    }
+                    var node, nodes;
+                    if (this.element.childNodes.length > 0) {
+                        node = this.element.firstChild;
+                        nodes = rangy.dom.getNodes(node, 3);
+                        if (nodes.length > 0) {
+                            node = nodes[0];
+                        }
+                    } else {
+                        node = document.createElement("p");
+                        this.element.appendChild(node);
+                        node.appendChild(document.createTextNode(""));
+                        node = node.firstChild;
+                    }
+                    if (node.nodeType === 3) {
+                        var range = rangy.createRange();
+                        range.setStart(node, 0);
+                        this.getSelection().setSingleRange(range);
+                    } else {
+                        this.setRange(node);
+                    }
+                    this.showToolbar();
                 },
                 getSelection: function() {
                     return rangy.getSelection();
@@ -1108,35 +1137,19 @@
                         return names.indexOf(n.nodeName.toLowerCase()) !== -1;
                     });
                 },
-                _getSelectionElement: function() {
-                    var range = this.getRange(), current = range.commonAncestorContainer, parent = current.parentNode, result;
-                    var getEditor = function(e) {
-                        var parent = e;
-                        try {
-                            while (!parent.getAttribute("data-editor-element")) {
-                                parent = parent.parentNode;
-                            }
-                        } catch (errb) {
-                            return false;
-                        }
-                        return parent;
-                    };
-                    try {
-                        if (current.getAttribute("data-editor-element")) {
-                            result = current;
-                        } else {
-                            result = getEditor(parent);
-                        }
-                    } catch (err) {
-                        result = getEditor(parent);
-                    }
-                    return result;
-                },
                 cleanBlock: function(node) {
                     var e = node.childNodes[node.childNodes.length - 1];
                     if (e.nodeType === 1 && e.nodeName.toLowerCase() === "br") {
                         node.removeChild(e);
                     }
+                },
+                serialize: function(clean) {
+                    var html = this.element.innerHTML;
+                    if (clean) {
+                        var cleaner = new HtmlCleaner();
+                        html = cleaner.clean(html);
+                    }
+                    return html;
                 }
             });
             exports.Editor = Editor;
@@ -1146,6 +1159,7 @@
                 block: _dereq_("./controls/block"),
                 media: _dereq_("./controls/media")
             };
+            exports.controls = controls;
             exports.simpleEditor = Class(Editor, {
                 init: function() {
                     Editor.prototype.init.apply(this, arguments);
@@ -1171,15 +1185,68 @@
                 }
             });
         }, {
-            "../vendor/rangy/core": 10,
+            "../vendor/rangy/core": 11,
             "./controls": 1,
             "./controls/block": 2,
             "./controls/inline": 3,
             "./controls/media": 4,
-            "./toolbar": 7,
-            "./util": 8
+            "./html-cleaner": 6,
+            "./toolbar": 8,
+            "./util": 9
         } ],
         6: [ function(_dereq_, module, exports) {
+            var Class = _dereq_("./util").Class;
+            var extend = _dereq_("./util").extend;
+            var _ = _dereq_("./util")._;
+            var HtmlCleaner = Class(Object, {
+                defaults: {},
+                init: function(options) {
+                    this.options = extend({}, this.defaults, options);
+                },
+                formatRegexp: [ [ /(<[a-z][^>]*)margin\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)margin-bottom\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)margin-left\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)margin-right\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)margin-top\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)padding\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)padding-bottom\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)padding-left\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)padding-right\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)padding-top\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)font\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)font-family\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)font-size\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)font-style\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)font-variant\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)font-weight\s*:[^;]*;/gm, "$1" ], [ /(<[a-z][^>]*)color\s*:[^;]*;/gm, "$1" ] ],
+                cleanRegexp: [ [ /<meta[\w\W]*?>/gim, "" ], [ /<style[\w\W]*?>[\w\W]*?<\/style>/gim, "" ], [ /<\/?font[\w\W]*?>/gim, "" ], [ /<(\/?)(B|b|STRONG)([\s>\/])/g, "<$1strong$3" ], [ /<(\/?)(I|i|EM)([\s>\/])/g, "<$1em$3" ], [ /<IMG ([^>]*?[^\/])>/gi, "<img $1 />" ], [ /<INPUT ([^>]*?[^\/])>/gi, "<input $1 />" ], [ /<COL ([^>]*?[^\/])>/gi, "<col $1 />" ], [ /<AREA ([^>]*?[^\/])>/gi, "<area $1 />" ], [ /<PARAM ([^>]*?[^\/])>/gi, "<param $1 />" ], [ /<HR ([^>]*?[^\/])>/gi, "<hr $1/>" ], [ /<BR ([^>]*?[^\/])>/gi, "<br $1/>" ], [ /<(\/?)U([\s>\/])/gi, "<$1ins$2" ], [ /<(\/?)STRIKE([\s>\/])/gi, "<$1del$2" ], [ /<span style="font-weight: normal;">([\w\W]*?)<\/span>/gm, "$1" ], [ /<span style="font-weight: bold;">([\w\W]*?)<\/span>/gm, "<strong>$1</strong>" ], [ /<span style="font-style: italic;">([\w\W]*?)<\/span>/gm, "<em>$1</em>" ], [ /<span style="text-decoration: underline;">([\w\W]*?)<\/span>/gm, "<ins>$1</ins>" ], [ /<span style="text-decoration: line-through;">([\w\W]*?)<\/span>/gm, "<del>$1</del>" ], [ /<span style="text-decoration: underline line-through;">([\w\W]*?)<\/span>/gm, "<del><ins>$1</ins></del>" ], [ /<span style="(font-weight: bold; ?|font-style: italic; ?){2}">([\w\W]*?)<\/span>/gm, "<strong><em>$2</em></strong>" ], [ /<span style="(font-weight: bold; ?|text-decoration: underline; ?){2}">([\w\W]*?)<\/span>/gm, "<ins><strong>$2</strong></ins>" ], [ /<span style="(font-weight: italic; ?|text-decoration: underline; ?){2}">([\w\W]*?)<\/span>/gm, "<ins><em>$2</em></ins>" ], [ /<span style="(font-weight: bold; ?|text-decoration: line-through; ?){2}">([\w\W]*?)<\/span>/gm, "<del><strong>$2</strong></del>" ], [ /<span style="(font-weight: italic; ?|text-decoration: line-through; ?){2}">([\w\W]*?)<\/span>/gm, "<del><em>$2</em></del>" ], [ /<span style="(font-weight: bold; ?|font-style: italic; ?|text-decoration: underline; ?){3}">([\w\W]*?)<\/span>/gm, "<ins><strong><em>$2</em></strong></ins>" ], [ /<span style="(font-weight: bold; ?|font-style: italic; ?|text-decoration: line-through; ?){3}">([\w\W]*?)<\/span>/gm, "<del><strong><em>$2</em></strong></del>" ], [ /<span style="(font-weight: bold; ?|font-style: italic; ?|text-decoration: underline line-through; ?){3}">([\w\W]*?)<\/span>/gm, "<del><ins><strong><em>$2</em></strong></ins></del>" ], [ /<strong style="font-weight: normal;">([\w\W]*?)<\/strong>/gm, "$1" ], [ /<([a-z]+) style="font-weight: normal;">([\w\W]*?)<\/\1>/gm, "<$1>$2</$1>" ], [ /<([a-z]+) style="font-weight: bold;">([\w\W]*?)<\/\1>/gm, "<$1><strong>$2</strong></$1>" ], [ /<([a-z]+) style="font-style: italic;">([\w\W]*?)<\/\1>/gm, "<$1><em>$2</em></$1>" ], [ /<([a-z]+) style="text-decoration: underline;">([\w\W]*?)<\/\1>/gm, "<ins><$1>$2</$1></ins>" ], [ /<([a-z]+) style="text-decoration: line-through;">([\w\W]*?)<\/\1>/gm, "<del><$1>$2</$1></del>" ], [ /<([a-z]+) style="text-decoration: underline line-through;">([\w\W]*?)<\/\1>/gm, "<del><ins><$1>$2</$1></ins></del>" ], [ /<([a-z]+) style="(font-weight: bold; ?|font-style: italic; ?){2}">([\w\W]*?)<\/\1>/gm, "<$1><strong><em>$3</em></strong></$1>" ], [ /<([a-z]+) style="(font-weight: bold; ?|text-decoration: underline; ?){2}">([\w\W]*?)<\/\1>/gm, "<ins><$1><strong>$3</strong></$1></ins>" ], [ /<([a-z]+) style="(font-weight: italic; ?|text-decoration: underline; ?){2}">([\w\W]*?)<\/\1>/gm, "<ins><$1><em>$3</em></$1></ins>" ], [ /<([a-z]+) style="(font-weight: bold; ?|text-decoration: line-through; ?){2}">([\w\W]*?)<\/\1>/gm, "<del><$1><strong>$3</strong></$1></del>" ], [ /<([a-z]+) style="(font-weight: italic; ?|text-decoration: line-through; ?){2}">([\w\W]*?)<\/\1>/gm, "<del><$1><em>$3</em></$1></del>" ], [ /<([a-z]+) style="(font-weight: bold; ?|font-style: italic; ?|text-decoration: underline; ?){3}">([\w\W]*?)<\/\1>/gm, "<ins><$1><strong><em>$3</em></strong></$1></ins>" ], [ /<([a-z]+) style="(font-weight: bold; ?|font-style: italic; ?|text-decoration: line-through; ?){3}">([\w\W]*?)<\/\1>/gm, "<del><$1><strong><em>$3</em></strong></$1></del>" ], [ /<([a-z]+) style="(font-weight: bold; ?|font-style: italic; ?|text-decoration: underline line-through; ?){3}">([\w\W]*?)<\/\1>/gm, "<del><ins><$1><strong><em>$3</em></strong></$1></ins></del>" ], [ /<p><blockquote>(.*)(\n)+<\/blockquote><\/p>/i, "<blockquote>$1</blockquote>\n" ], [ /<\/(strong|em|ins|del|q|code)>(\s*?)<\1>/gim, "$2" ], [ /<(br|BR)>/g, "<br />" ], [ /<(hr|HR)>/g, "<hr />" ], [ /([^\s])\/>/g, "$1 />" ], [ /<br \/>\s*<\/(h1|h2|h3|h4|h5|h6|ul|ol|li|p|blockquote|div)/gi, "</$1" ], [ /<\/(h1|h2|h3|h4|h5|h6|ul|ol|li|p|blockquote)>([^\n\u000B\r\f])/gi, "</$1>\n$2" ], [ /<hr style="width: 100%; height: 2px;" \/>/g, "<hr />" ], [ /style="\s*?"/gim, "" ], [ /<\s+/gim, "<" ], [ /\s+>/gim, ">" ] ],
+                removeFormat: function(html) {
+                    _.each(this.formatRegexp, function(v) {
+                        html = "".replace.apply(html, v);
+                    });
+                    return html;
+                },
+                tagsoup2html: function(html) {
+                    _.each(this.cleanRegexp, function(v) {
+                        html = "".replace.apply(html, v);
+                    });
+                    while (/(<[^\/!]>|<[^\/!][^>]*[^\/]>)\s*<\/[^>]*[^-]>/.test(html)) {
+                        html = html.replace(/(<[^\/!]>|<[^\/!][^>]*[^\/]>)\s*<\/[^>]*[^-]>/g, "");
+                    }
+                    html = html.replace(/<(\/?)([A-Z0-9]+)/g, function(m0, m1, m2) {
+                        return "<" + m1 + m2.toLowerCase();
+                    });
+                    var reg = /<[^>]+((\s+\w+\s*=\s*)([^"'][\w~@+$,%\/:.#?=&;!*()-]*))[^>]*?>/;
+                    var _f = function(m0, m1, m2, m3) {
+                        var _r = m1.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g, "\\$1");
+                        return m0.replace(_r, m2 + '"' + m3 + '"');
+                    };
+                    while (reg.test(html)) {
+                        html = html.replace(reg, _f);
+                    }
+                    while (/(<[^>]+style=(["'])[^>]+[\s:]+)0(pt|px)(\2|\s|;)/.test(html)) {
+                        html = html.replace(/(<[^>]+style=(["'])[^>]+[\s:]+)0(pt|px)(\2|\s|;)/gi, "$1" + "0$4");
+                    }
+                    html = html.replace(/\r\n/g, "\n");
+                    html = html.replace(/^\s+/, "").replace(/\s+$/, "");
+                    return html;
+                },
+                clean: function(html) {
+                    html = this.removeFormat(html);
+                    html = this.tagsoup2html(html);
+                    return html;
+                }
+            });
+            exports.HtmlCleaner = HtmlCleaner;
+        }, {
+            "./util": 9
+        } ],
+        7: [ function(_dereq_, module, exports) {
             var rangy = _dereq_("../vendor/rangy/core");
             var _ = _dereq_("./util")._;
             rangy.api.createCoreModule("RangyExtensions", [], function(api) {
@@ -1263,7 +1330,7 @@
                     return typeof filter === "function" ? _.filter(result, filter) : result;
                 };
                 api.dom.hasParents = function(node, parents) {
-                    while ([ document, document.body ].indexOf(node) === -1) {
+                    while ([ document, document.body ].indexOf(node) === -1 && node != null) {
                         if (parents.indexOf(node) !== -1) {
                             return true;
                         }
@@ -1284,12 +1351,25 @@
                     });
                     node.parentNode.replaceChild(content, node);
                 };
+                api.dom.getNodes = function(node, nodeType, inloop) {
+                    var result = [];
+                    if (!inloop && (typeof nodeType === "undefined" || node.nodeType === nodeType)) {
+                        result.push(node);
+                    }
+                    for (var i = 0; i < node.childNodes.length; i++) {
+                        if (typeof nodeType === "undefined" || node.childNodes[i].nodeType === nodeType) {
+                            result.push(node.childNodes[i]);
+                        }
+                        [].push.apply(result, api.dom.getNodes(node.childNodes[i], nodeType, true));
+                    }
+                    return result;
+                };
             });
         }, {
-            "../vendor/rangy/core": 10,
-            "./util": 8
+            "../vendor/rangy/core": 11,
+            "./util": 9
         } ],
-        7: [ function(_dereq_, module, exports) {
+        8: [ function(_dereq_, module, exports) {
             var _util = _dereq_("./util"), _controls = _dereq_("./controls"), ControlsMixin = _controls.ControlsMixin, extend = _util.extend, Class = _util.Class;
             var Toolbar = Class(Object, {
                 defaults: {
@@ -1381,9 +1461,9 @@
             exports.Toolbar = Toolbar;
         }, {
             "./controls": 1,
-            "./util": 8
+            "./util": 9
         } ],
-        8: [ function(_dereq_, module, exports) {
+        9: [ function(_dereq_, module, exports) {
             var extend = function() {
                 var args = Array.prototype.slice.call(arguments);
                 var base = args.shift();
@@ -1462,8 +1542,8 @@
             exports.Class = Class;
             exports._ = _;
         }, {} ],
-        9: [ function(_dereq_, module, exports) {
-            exports.VERSION = "0.2.0";
+        10: [ function(_dereq_, module, exports) {
+            exports.VERSION = "0.3.0";
             exports.rangy = _dereq_("./vendor/rangy/core").api;
             _dereq_("./vendor/rangy/dom");
             _dereq_("./vendor/rangy/domrange");
@@ -1471,19 +1551,25 @@
             _dereq_("./vendor/rangy/wrappedrange");
             _dereq_("./vendor/rangy/wrappedselection");
             _dereq_("./lib/rangy-extensions");
+            exports.extend = _dereq_("./lib/util").extend;
+            exports.Class = _dereq_("./lib/util").Class;
+            exports.HtmlCleaner = _dereq_("./lib/html-cleaner").HtmlCleaner;
             exports.Editor = _dereq_("./lib/editor").Editor;
+            exports.controls = _dereq_("./lib/editor").controls;
             exports.simpleEditor = _dereq_("./lib/editor").simpleEditor;
         }, {
             "./lib/editor": 5,
-            "./lib/rangy-extensions": 6,
-            "./vendor/rangy/core": 10,
-            "./vendor/rangy/dom": 11,
-            "./vendor/rangy/domrange": 12,
-            "./vendor/rangy/selectionsaverestore": 13,
-            "./vendor/rangy/wrappedrange": 14,
-            "./vendor/rangy/wrappedselection": 15
+            "./lib/html-cleaner": 6,
+            "./lib/rangy-extensions": 7,
+            "./lib/util": 9,
+            "./vendor/rangy/core": 11,
+            "./vendor/rangy/dom": 12,
+            "./vendor/rangy/domrange": 13,
+            "./vendor/rangy/selectionsaverestore": 14,
+            "./vendor/rangy/wrappedrange": 15,
+            "./vendor/rangy/wrappedselection": 16
         } ],
-        10: [ function(_dereq_, module, exports) {
+        11: [ function(_dereq_, module, exports) {
             var OBJECT = "object", FUNCTION = "function", UNDEFINED = "undefined";
             var domRangeProperties = [ "startContainer", "startOffset", "endContainer", "endOffset", "collapsed", "commonAncestorContainer" ];
             var domRangeMethods = [ "setStart", "setStartBefore", "setStartAfter", "setEnd", "setEndBefore", "setEndAfter", "collapse", "selectNode", "selectNodeContents", "compareBoundaryPoints", "deleteContents", "extractContents", "cloneContents", "insertNode", "surroundContents", "cloneRange", "toString", "detach" ];
@@ -1764,7 +1850,7 @@
             api.selectionPrototype = new SelectionPrototype();
             exports.api = api;
         }, {} ],
-        11: [ function(_dereq_, module, exports) {
+        12: [ function(_dereq_, module, exports) {
             var rangy = _dereq_("./core");
             rangy.api.createCoreModule("DomUtil", [], function(api, module) {
                 var UNDEF = "undefined";
@@ -2143,9 +2229,9 @@
                 api.DOMException = DOMException;
             });
         }, {
-            "./core": 10
+            "./core": 11
         } ],
-        12: [ function(_dereq_, module, exports) {
+        13: [ function(_dereq_, module, exports) {
             var rangy = _dereq_("./core");
             rangy.api.createCoreModule("DomRange", [ "DomUtil" ], function(api, module) {
                 var dom = api.dom;
@@ -3076,9 +3162,9 @@
                 api.RangeException = RangeException;
             });
         }, {
-            "./core": 10
+            "./core": 11
         } ],
-        13: [ function(_dereq_, module, exports) {
+        14: [ function(_dereq_, module, exports) {
             var rangy = _dereq_("./core");
             rangy.api.createModule("SaveRestore", [ "WrappedRange" ], function(api, module) {
                 var dom = api.dom;
@@ -3259,9 +3345,9 @@
                 });
             });
         }, {
-            "./core": 10
+            "./core": 11
         } ],
-        14: [ function(_dereq_, module, exports) {
+        15: [ function(_dereq_, module, exports) {
             var rangy = _dereq_("./core");
             rangy.api.createCoreModule("WrappedRange", [ "DomRange" ], function(api, module) {
                 var WrappedRange, WrappedTextRange;
@@ -3658,9 +3744,9 @@
                 });
             });
         }, {
-            "./core": 10
+            "./core": 11
         } ],
-        15: [ function(_dereq_, module, exports) {
+        16: [ function(_dereq_, module, exports) {
             var rangy = _dereq_("./core");
             rangy.api.createCoreModule("WrappedSelection", [ "DomRange", "WrappedRange" ], function(api, module) {
                 api.config.checkSelectionRanges = true;
@@ -4432,7 +4518,7 @@
                 });
             });
         }, {
-            "./core": 10
+            "./core": 11
         } ]
-    }, {}, [ 9 ])(9);
+    }, {}, [ 10 ])(10);
 });
