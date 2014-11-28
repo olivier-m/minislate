@@ -34,6 +34,7 @@ var Editor = Class(Object, {
         }
 
         this.isActive = true;
+        this.isSelected = false;
         this.options = extend({}, this.defaults, options);
 
         // Internal properties
@@ -73,6 +74,7 @@ var Editor = Class(Object, {
         this.on('focus', function() {
             self._onFocus();
         });
+
         return this;
     },
 
@@ -89,18 +91,21 @@ var Editor = Class(Object, {
 
         document.addEventListener('mouseup', wrapper);
         document.addEventListener('keyup', wrapper);
+
         return this;
     },
 
     bindTyping: function() {
         var self = this;
 
-        this.on('keyup', function() {
+        this.on('keyup', function(evt) {
             var selection = self.getSelection();
-            if (selection.isCollapsed && selection.getEnclosingNode() === self._currentEditor) {
+            if (evt.which !== 9 && selection.isCollapsed && selection.getEnclosingNode() === self._currentEditor) {
                 self.exec('formatBlock', 'p');
             }
         });
+
+        return this;
     },
 
     initToolbar: function() {
@@ -220,8 +225,11 @@ var Editor = Class(Object, {
         var elements = [this.element, this.toolbar.element];
 
         if (!rangy.dom.hasParents(evt.target, elements)) {
-            this.hideToolbar();
-            this._currentEditor = null;
+            if (this.isSelected) {
+                this.hideToolbar();
+                this._currentEditor = null;
+                this.isSelected = false;
+            }
             return;
         }
 
@@ -229,6 +237,51 @@ var Editor = Class(Object, {
         if (!rangy.dom.hasParents(evt.target, [this.toolbar.element])) {
             this.showToolbar();
         }
+
+        if (!this.isSelected) {
+            this.isSelected = true;
+
+            // Adjust selection when entering editor with tab key
+            if (evt.which === 9) {
+                this.selectStart();
+            }
+        }
+    },
+
+    selectStart: function() {
+        var selection = this.getSelection();
+        if (!selection.isCollapsed) {
+            return;
+        }
+
+        if (this.element.childNodes.length > 0 && this.element.firstChild.nodeType === 3) {
+            if (this.element.firstChild.textContent.replace(/^\s*(.*?)\s*$/, '$1') === '') {
+                this.element.removeChild(this.element.firstChild);
+            }
+        }
+
+        var node, nodes;
+        if (this.element.childNodes.length > 0) {
+            node = this.element.firstChild;
+            nodes = rangy.dom.getNodes(node, 3);
+            if (nodes.length > 0) {
+                node = nodes[0];
+            }
+        } else {
+            node = document.createElement('p');
+            this.element.appendChild(node);
+            node.appendChild(document.createTextNode(''));
+            node = node.firstChild;
+        }
+
+        if (node.nodeType === 3) {
+            var range = rangy.createRange();
+            range.setStart(node, 0);
+            this.getSelection().setSingleRange(range);
+        } else {
+            this.setRange(node);
+        }
+        this.showToolbar();
     },
 
     // Selected nodes utils.
@@ -316,6 +369,8 @@ var controls = {
     block: require('./controls/block'),
     media: require('./controls/media')
 };
+
+exports.controls = controls;
 
 exports.simpleEditor = Class(Editor, {
     init: function() {

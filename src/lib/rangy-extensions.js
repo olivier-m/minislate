@@ -139,4 +139,20 @@ rangy.api.createCoreModule('RangyExtensions', [], function(api) {
 
         node.parentNode.replaceChild(content, node);
     };
+
+    api.dom.getNodes = function(node, nodeType, inloop) {
+        var result = [];
+
+        if (!inloop && (typeof(nodeType) === 'undefined' || node.nodeType === nodeType)) {
+            result.push(node);
+        }
+
+        for (var i=0; i<node.childNodes.length; i++) {
+            if (typeof(nodeType) === 'undefined' || node.childNodes[i].nodeType === nodeType) {
+                result.push(node.childNodes[i]);
+            }
+            [].push.apply(result, api.dom.getNodes(node.childNodes[i], nodeType, true));
+        }
+        return result;
+    };
 });

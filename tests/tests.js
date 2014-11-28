@@ -29,6 +29,23 @@ window.addEventListener('DOMContentLoaded', function() {
         return range;
     };
 
+    module('Rangy Extensions', {
+        setup: function() {
+            root.innerHTML = '<ul><li>test</li></ul>';
+            this.ul = root.firstChild;
+            this.li = root.querySelector('li');
+            this.txt = this.li.firstChild;
+        }
+    });
+    test('get all nodes', function(test) {
+        var nodes = rangy.dom.getNodes(root);
+        test.deepEqual(nodes, [root, this.ul, this.li, this.txt]);
+    });
+    test('get node by type', function(test) {
+        var nodes = rangy.dom.getNodes(root, 3);
+        test.deepEqual(nodes, [this.txt]);
+    });
+
 
     module('Simple selections', {
         setup: function() {
