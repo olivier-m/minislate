@@ -94,7 +94,7 @@
     <header>
       <h2>Demo</h2>
     </header>
-    <article contenteditable="true" class="editor">
+    <article contenteditable="true" id="editor">
       <p>This is the unavoidable demo. You can edit this text as you wish.</p>
 
       <h3>Some sample text</h3>
@@ -163,7 +163,7 @@
   <script src="dist/js/minislate.min.js"></script>
   <script>
   window.addEventListener('DOMContentLoaded', function() {
-    var editor = new Minislate.simpleEditor('.editor');
+    var editor = new Minislate.simpleEditor(document.getElementById('editor'));
   });
   </script>
 </body>
