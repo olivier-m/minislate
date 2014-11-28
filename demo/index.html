@@ -9,14 +9,17 @@
     font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
     font-size: 16px;
   }
-  body > div, body > p {
+  .editable, .noneditable, body > p {
     width: 80%;
     margin: 0 auto;
+  }
+  textarea {
+    width: 100%;
+    padding: 5px;
   }
   </style>
 </head>
 <body>
-
 <div class="editable">
 <h1>Test</h1>
 
@@ -49,7 +52,10 @@ venenatis turpis id, dignissim eros. Donec pharetra gravida ligula at consequat.
 <div class="editable">
 <h2>Another editable section.</h2>
 <p>Aspernatur perspiciatis sunt maiores nam repellendus laboriosam necessitatibus deserunt, harum
-iusto molestiae consectetur qui sequi numquam deleniti pariatur.</p>
+iusto molestiae consectetur <span class=woot>qui</span> sequi numquam deleniti pariatur.</p>
+ <p style="   ">Lorem</p>
+
+
 </div>
 
 <script src="js/minislate.js"></script>
@@ -57,13 +63,34 @@ iusto molestiae consectetur qui sequi numquam deleniti pariatur.</p>
 window.addEventListener('DOMContentLoaded', function() {
     function newEditor(element) {
       var editor = new Minislate.simpleEditor(element);
+
+      var htmlResult = document.createElement('textarea');
+      htmlResult.setAttribute('rows', 10);
+      htmlResult.setAttribute('cols', 80);
+
+      var button = document.createElement('button');
+      button.addEventListener('click', function(evt) {
+        evt.preventDefault();
+        var html = editor.serialize(true);
+
+        if (!htmlResult.parentNode) {
+          button.parentNode.insertBefore(htmlResult, button.nextSibling);
+        }
+        while (htmlResult.firstChild) {
+          htmlResult.removeChild(htmlResult.firstChild);
+        }
+        htmlResult.appendChild(document.createTextNode(html));
+      });
+      button.appendChild(document.createTextNode('serialize'));
+      var p = document.createElement('p');
+      p.appendChild(button);
+      element.parentNode.insertBefore(p, element.nextSibling);
     }
 
     var elements = document.querySelectorAll('.editable');
     for (var i=0; i<elements.length; i++) {
       newEditor(elements[i]);
     }
-
 });
 </script>
 </body>

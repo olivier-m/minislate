@@ -5,6 +5,7 @@ var extend = require('./util').extend;
 var Class = require('./util').Class;
 var Toolbar = require('./toolbar').Toolbar;
 var _ = require('./util')._;
+var HtmlCleaner = require('./html-cleaner').HtmlCleaner;
 
 /*
  * Editor (main)
@@ -357,6 +358,15 @@ var Editor = Class(Object, {
         if (e.nodeType === 1 && e.nodeName.toLowerCase() === 'br') {
             node.removeChild(e);
         }
+    },
+
+    serialize: function(clean) {
+        var html = this.element.innerHTML;
+        if (clean) {
+            var cleaner = new HtmlCleaner();
+            html = cleaner.clean(html);
+        }
+        return html;
     }
 });
 
