@@ -1,5 +1,12 @@
-@import "base"
+// Configuration
+editor-class-prefix ?= editor-
+editor-bgcolor ?= #333
+editor-fgcolor ?= #fff
+editor-input-bgcolor ?= #ccc
+editor-input-fgcolor ?= #000
 
+
+// Styles
 .{editor-class-prefix}toolbar
     position absolute
     top 0
@@ -14,7 +21,7 @@
     font-size 16px
 
     border-radius 3px
-    drop-shadow()
+    box-shadow 2 5 8 rgba(0, 0, 0, 0.6)
     animation pop-upwards 100ms forward linear
     transition top .1s ease-out, left .1s ease-out
 
@@ -24,7 +31,7 @@
     padding 0
     list-style none
     width 100%
-    background-image linear-gradient(editor-bgcolor, lighten(editor-bgcolor, -20%))
+    background-image linear-gradient(to top, editor-bgcolor, lighten(editor-bgcolor, -20%))
 
 .{editor-class-prefix}controls li
     display block
@@ -40,6 +47,7 @@
         margin 0
         cursor pointer
         background-color transparent
+        background-image none
         color editor-fgcolor
         font-size 1em
         border 0
@@ -53,13 +61,13 @@
 
         &:hover
         &:focus
-            background-image linear-gradient(lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, -10%))
+            background-image linear-gradient(to top, lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, -10%))
 
         &.{editor-class-prefix}highlight, &:active
-            background-image linear-gradient(editor-bgcolor, lighten(editor-bgcolor, 20%))
+            background-image linear-gradient(to top, editor-bgcolor, lighten(editor-bgcolor, 20%))
 
         &.{editor-class-prefix}highlight:hover
-            background-image linear-gradient(lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, 30%))
+            background-image linear-gradient(to top, lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, 30%))
 
         i.fa
             font-weight normal
@@ -70,7 +78,7 @@
         position absolute
         border-radius 3px
         width auto
-        drop-shadow()
+        box-shadow 2 5 8 rgba(0, 0, 0, 0.6)
 
         li
             float none
@@ -110,7 +118,7 @@
         padding 3px 5px
         margin 0 0 0 4px
         cursor pointer
-        background-image linear-gradient(lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, 20%))
+        background-image linear-gradient(to top, lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, 20%))
         color editor-fgcolor
         font-size 1em
         border 1px solid lighten(editor-bgcolor, 19.99%)
@@ -122,7 +130,7 @@
             padding 0
 
         &:hover, &:focus
-            background-image linear-gradient(lighten(editor-bgcolor, 30%), lighten(editor-bgcolor, 20%))
+            background-image linear-gradient(to top, lighten(editor-bgcolor, 30%), lighten(editor-bgcolor, 20%))
 
         &:active
-            background-image linear-gradient(lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, 20%));
+            background-image linear-gradient(to top, lighten(editor-bgcolor, 10%), lighten(editor-bgcolor, 20%));

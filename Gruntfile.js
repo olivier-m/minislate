@@ -8,6 +8,15 @@ module.exports = function(grunt) {
     grunt.initConfig({
         pkg: pkg,
 
+        autoprefixer: {
+            options: {
+                browsers: ['last 2 versions', 'Firefox ESR', 'ie 8', 'ie 9']
+            },
+            dist: {
+                src: ['dist/css/*.css']
+            }
+        },
+
         clean: {
             dist: ['dist/']
         },
@@ -122,7 +131,7 @@ module.exports = function(grunt) {
         watch: {
             css: {
                 files: ['src/css/*.styl'],
-                tasks: ['stylus:dev']
+                tasks: ['stylus:dev', 'autoprefixer:dist']
             },
             js: {
                 files: ['src/*.js', 'src/**/*.js'],
@@ -145,6 +154,7 @@ module.exports = function(grunt) {
         }
     });
 
+    grunt.loadNpmTasks('grunt-autoprefixer');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-connect');
@@ -156,7 +166,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-zip');
 
     grunt.registerTask('build', ['browserify']);
-    grunt.registerTask('dist', ['build', 'copy:dist', 'uglify', 'stylus', 'copy:fonts', 'zip']);
+    grunt.registerTask('dist', ['build', 'copy:dist', 'uglify', 'stylus', 'autoprefixer:dist', 'copy:fonts', 'zip']);
     grunt.registerTask('rangy', ['copy:rangy', 'bundle:rangy']);
     grunt.registerTask('runserver', ['dist', 'connect:dev', 'watch']);
     grunt.registerTask('release', ['clean', 'dist', 'gh-pages']);
