@@ -103,6 +103,14 @@ editor-input-fgcolor ?= #000
     &.{editor-class-prefix}menu span.{editor-class-prefix}menu-arrow
         color lighten(editor-fgcolor, -50%)
 
+.{editor-class-prefix}controls.rtl li,
+html[dir='rtl'] .{editor-class-prefix}controls li
+    float right
+
+    li button
+        text-align right
+
+
 .{editor-class-prefix}dialog
     padding 6px
     font-size 12px

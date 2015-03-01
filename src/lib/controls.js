@@ -77,14 +77,14 @@ var BaseControl = Class(Object, {
         }
 
         var text = document.createTextNode(label);
+        var span = document.createElement('span');
+        span.appendChild(text);
         if (this.toolbar.options.fontAwesomeEnabled && fontAwesomeID) {
             var fa = this.getFaElement(fontAwesomeID);
-            var span = document.createElement('span');
-            span.appendChild(text);
             fa.appendChild(span);
             this.element.appendChild(fa);
         } else {
-            this.element.appendChild(text);
+            this.element.appendChild(span);
         }
     },
 

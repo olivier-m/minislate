@@ -23,6 +23,7 @@ var Toolbar = Class(Object, {
         this.dialog = document.createElement('div');
 
         this.container.classList.add(this._getClassName('controls'));
+        if (this.editor.isRtl) this.container.classList.add('rtl');
         this.element.classList.add(this._getClassName('toolbar'));
         document.body.appendChild(this.element);
 
