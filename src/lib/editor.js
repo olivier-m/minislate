@@ -13,10 +13,11 @@ var HtmlCleaner = require('./html-cleaner').HtmlCleaner;
 var Editor = Class(Object, {
     defaults: {
         delay: 300,
-        diffLeft: 2,
-        diffTop: -10,
+        offsetX: 2,
+        offsetY: -10,
         classPrefix: 'editor-',
-        fontAwesomeEnabled: true
+        fontAwesomeEnabled: true,
+        rtl: false
     },
     BLOCK_NODES: 'P H1 H2 H3 H4 H5 H6 UL OL PRE DL DIV NOSCRIPT BLOCKQUOTE FORM HR TABLE FIELDSET ADDRESS'.split(' '),
 
@@ -37,6 +38,7 @@ var Editor = Class(Object, {
         this.isActive = true;
         this.isSelected = false;
         this.options = extend({}, this.defaults, options);
+        this.isRtl = this.options.rtl || document.documentElement.getAttribute('dir') === 'rtl';
 
         // Internal properties
         this._currentEditor = null;
@@ -193,16 +195,18 @@ var Editor = Class(Object, {
         // Top position
         var top = 0;
         if (boundary.top < height) {
-            top = boundary.bottom - this.options.diffTop + window.pageYOffset;
+            top = boundary.bottom - this.options.offsetY + window.pageYOffset;
         } else {
-            top = boundary.top + this.options.diffTop + window.pageYOffset - height;
+            top = boundary.top + this.options.offsetY + window.pageYOffset - height;
         }
 
         // Left position
-        var left = boundary.left - this.options.diffLeft;
-        if (this._currentEditor.offsetWidth < width + boundary.left) {
-            left = boundary.right - width + this.options.diffLeft;
-        }
+        var left = boundary.left - this.options.offsetX,
+            right = boundary.right - width + this.options.offsetX,
+            overflowLeft = boundary.right - width < this._currentEditor.offsetLeft,
+            overflowRight = this._currentEditor.offsetLeft + this._currentEditor.offsetWidth < width + boundary.left;
+
+        if ((this.isRtl && !overflowLeft) || overflowRight) left = right;
 
         this.toolbar.move(top, left);
     },
