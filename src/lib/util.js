@@ -46,6 +46,34 @@ var Class = function(parent, proto) {
 };
 
 
+/* *********************** I18N  **************************/
+// Very simple translation management system.
+// Use tr('yourstring') when you deal with a string that needs to be
+// translatable.
+// If you have dynamic variables, you can use tr('Title level {level}', {level: 1})
+// Use tr.register({string: translation}) to populate the locale.
+var I18n = function (s, data) {
+    return new I18n.LazyString(s, data);
+};
+I18n.locale = {};
+I18n.register = function (locale) {
+    for (var k in locale) I18n.locale[k] = locale[k];
+};
+I18n.LazyString = function (s, data) {
+    this.s = s;
+    this.data = data || {};
+};
+I18n.LazyString.prototype.toString = function () {
+    return I18n.template(I18n.locale[this.s] || this.s, this.data);
+};
+I18n.template = function (str, data) {
+    return str.replace(/\{ *([\w_]+) *\}/g, function (s, k) {
+        return data[k] || '';
+    });
+};
+
+
+
 // Some array utilities from underscore.js
 var _ = {};
 /* jshint ignore:start */
@@ -93,3 +121,4 @@ _.filter = function(obj, predicate, context) {
 exports.extend = extend;
 exports.Class = Class;
 exports._ = _;
+exports.tr = I18n;

@@ -12,6 +12,7 @@ require('./lib/rangy-extensions');
 
 // Utils
 exports.extend = require('./lib/util').extend;
+exports.tr = require('./lib/util').tr;
 exports.Class = require('./lib/util').Class;
 exports.HtmlCleaner = require('./lib/html-cleaner').HtmlCleaner;
 

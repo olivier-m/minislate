@@ -8,6 +8,7 @@ var _util = require('../util'),
     Class = _util.Class,
     extend = _util.extend,
     Button = _controls.Button,
+    tr = _util.tr,
     Dialog = _controls.Dialog;
 
 
@@ -49,7 +50,7 @@ var ImageDialog = Class(Dialog, {
 exports.Image = Class(Button, {
     defaults: extend({}, Button.prototype.defaults, {
         label: 'IMG',
-        title: 'Image',
+        title: tr('Image'),
         fontAwesomeID: 'picture-o'
     }),
 
@@ -102,7 +103,7 @@ exports.Image = Class(Button, {
 exports.Oembed = Class(Button, {
     defaults: extend({}, Button.prototype.defaults, {
         label: 'Embeded',
-        title: 'Embeded content',
+        title: tr('Embeded content'),
         fontAwesomeID: 'youtube-play'
     }),
 

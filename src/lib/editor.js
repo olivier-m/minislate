@@ -5,6 +5,7 @@ var extend = require('./util').extend;
 var Class = require('./util').Class;
 var Toolbar = require('./toolbar').Toolbar;
 var _ = require('./util')._;
+var tr = require('./util').tr;
 var HtmlCleaner = require('./html-cleaner').HtmlCleaner;
 
 /*
@@ -37,6 +38,7 @@ var Editor = Class(Object, {
         this.isActive = true;
         this.isSelected = false;
         this.options = extend({}, this.defaults, options);
+        if (this.options.i18n) tr.register(this.options.i18n);
 
         // Internal properties
         this._currentEditor = null;

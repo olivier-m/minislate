@@ -8,6 +8,7 @@ var _util = require('../util'),
     Class = _util.Class,
     extend = _util.extend,
     _ = _util._,
+    tr = _util.tr,
     Button = _controls.Button;
 
 
@@ -59,7 +60,7 @@ exports.Paragraph = Class(Block, {
     command: 'formatblock',
     defaults: extend({}, Block.prototype.defaults, {
         label: '¶',
-        title: 'Paragraph'
+        title: tr('Paragraph')
     })
 });
 
@@ -70,7 +71,7 @@ for (var i=1; i<=6; i++) {
         tag: 'h' + i,
         defaults: extend({}, Block.prototype.defaults, {
             label: 'H' + i,
-            title: 'Title level ' + i
+            title: tr('Title level {level}', {level: i})
         })
     });
     exports['H' + i] = C;
@@ -83,7 +84,7 @@ exports.Preformated = Class(Block, {
     tag: 'pre',
     defaults: extend({}, Block.prototype.defaults, {
         label: '<>',
-        title: 'Code',
+        title: tr('Code'),
         fontAwesomeID: 'code',
         tabReplacement: '    '
     }),
@@ -176,7 +177,7 @@ exports.UnorderedList = Class(BaseList, {
     command: 'insertunorderedlist',
     defaults: extend({}, BaseList.prototype.defaults, {
         label: 'UL',
-        title: 'Unordered list',
+        title: tr('Unordered list'),
         fontAwesomeID: 'list-ul'
     })
 });
@@ -188,7 +189,7 @@ exports.OrderedList = Class(BaseList, {
     command: 'insertorderedlist',
     defaults: extend({}, BaseList.prototype.defaults, {
         label: 'OL',
-        title: 'Ordered list',
+        title: tr('Ordered list'),
         fontAwesomeID: 'list-ol'
     })
 });
@@ -199,7 +200,7 @@ exports.Blockquote = Class(Block, {
     tagList: ['blockquote'],
     defaults: extend({}, Block.prototype.defaults, {
         label: 'Quote',
-        title: 'Quote',
+        title: tr('Quote'),
         fontAwesomeID: 'quote-right'
     }),
 

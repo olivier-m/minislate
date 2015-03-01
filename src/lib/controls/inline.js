@@ -8,6 +8,7 @@ var _util = require('../util'),
     Class = _util.Class,
     extend = _util.extend,
     _ = _util._,
+    tr = _util.tr,
     Button = _controls.Button,
     Dialog = _controls.Dialog;
 
@@ -47,7 +48,7 @@ exports.Inline = Inline;
 exports.Bold = Class(Inline, {
     defaults: extend({}, Inline.prototype.defaults, {
         label: 'B',
-        title: 'Bold',
+        title: tr('Bold'),
         fontAwesomeID: 'bold'
     }),
     tagList: ['b', 'strong'],
@@ -73,7 +74,7 @@ exports.Bold = Class(Inline, {
 exports.Italic = Class(Inline, {
     defaults: extend({}, Inline.prototype.defaults, {
         label: 'I',
-        title: 'Italic',
+        title: tr('Italic'),
         fontAwesomeID: 'italic'
     }),
     tagList: ['i', 'em'],
@@ -99,7 +100,7 @@ exports.Italic = Class(Inline, {
 exports.Underline = Class(Inline, {
     defaults: extend({}, Inline.prototype.defaults, {
         label: 'U',
-        title: 'Underline',
+        title: tr('Underline'),
         fontAwesomeID: 'underline'
     }),
     tagList: ['u', 'ins'],
@@ -110,7 +111,7 @@ exports.Underline = Class(Inline, {
 exports.StrikeThrough = Class(Inline, {
     defaults: extend({}, Inline.prototype.defaults, {
         label: 'S',
-        title: 'Strike-Through',
+        title: tr('Strike-Through'),
         fontAwesomeID: 'strikethrough'
     }),
     tagList: ['strike', 'del'],
@@ -164,7 +165,7 @@ var LinkDialog = Class(Dialog, {
 exports.Link = Class(Button, {
     defaults: extend({}, Button.prototype.defaults, {
         label: '#',
-        base_title: 'Link',
+        base_title: tr('Link'),
         title: '',
         fontAwesomeID: 'link'
     }),
