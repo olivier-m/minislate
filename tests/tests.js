@@ -199,4 +199,25 @@ window.addEventListener('DOMContentLoaded', function() {
         test.deepEqual(getSelection().getTopNodes(root), []);
         test.deepEqual(getSelection().getSurroundingNodes(), [].slice.call(root.childNodes));
     });
+
+    module('I18n');
+    test('should be set via register', function (test) {
+        Minislate.tr.register({'string': 'translated'});
+        test.equal(Minislate.tr('string'), 'translated');
+    });
+    test('should be lazy', function (test) {
+        var translated = Minislate.tr('string');
+        Minislate.tr.register({'string': 'chaîne'});
+        test.equal(translated, 'chaîne');
+    });
+    test('should allow variables', function (test) {
+        var translated = Minislate.tr('title level {level}', {level: '1'});
+        Minislate.tr.register({'title level {level}': 'titre niveau {level}'});
+        test.equal(translated, 'titre niveau 1');
+    });
+    test('should be set via editor options', function (test) {
+        var element = document.createElement('div');
+        new Minislate.simpleEditor(element, {i18n: {'string': 'from options'}});
+        test.equal(Minislate.tr('string'), 'from options');
+    });
 });
